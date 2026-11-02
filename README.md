@@ -16,6 +16,11 @@ npm run dev            # http://0.0.0.0:3000
 
 `npx tsc --noEmit` and `npx next build` must both be clean.
 
+`next.config.mjs` sets `allowedDevOrigins: ["*.e2b.app"]`: the Arena preview loads the app in an
+iframe from `https://3000-<sandbox>.e2b.app`, and Next.js 16 otherwise blocks cross-origin
+`/_next` dev resources (HMR) with a 403. Restart the dev server after changing this config.
+If Turbopack throws after a reinstall, delete `.next/` and restart.
+
 ## Storage drivers (`lib/store.ts`, server-only)
 
 1. **postgres** — `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` + `HUB_STATE_TABLE` (default
