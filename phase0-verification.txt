@@ -1,0 +1,82 @@
+PHASE0_BASE=http://127.0.0.1:3000
+PHASE0_STAMP=20261102T221308Z
+--- 14 pages (13 existing + /departments) ---
+/ 200
+/tasks 200
+/approvals 200
+/clients 200
+/agents 200
+/departments 200
+/status 200
+/research 200
+/publishing 200
+/audience 200
+/connections 200
+/callcenter 200
+/memory 200
+/production 200
+--- department registry ---
+"summary":{"total":10,"active":7,"deferred":3,"priorityOrder":["01","02","04","03","05","09","10"],"deferredIds":["06","07","08"],"divisions":69,"roles":156}
+active_p0_count 7
+deferred_count 3
+--- safe internal skills catalogue ---
+"summary":{"total":34,"checkSkills":18,"draftSkills":16,"requiresExternal":0,"byDepartment":[{"id":"01","name":"HR, Finance & Administration","skills":["invoice.draft","expense.draft","document.register"]}
+--- create a real job for skills that need one ---
+skill_harness_job_id=job_mvztf1kzboaq6f
+--- execute EVERY skill (real deterministic work, evidence hash) ---
+skill audience.segment         ok=1 sha=0be65d2918a665b7
+skill campaign.plan            ok=1 sha=efb101781c092826
+skill client.record            ok=1 sha=f2905975b649049c
+skill code.scaffold            ok=1 sha=6653279af653be9f
+skill content.draft            ok=1 sha=d73e9a9c3c2c372b
+skill delivery.checklist       ok=1 sha=fe0fd05dda218da2
+skill department.registry      ok=1 sha=521c5eda1d4a20c7
+skill dependency.check         ok=1 sha=5283b25902ce72cb
+skill design.brief             ok=1 sha=5df0bca86fa38b47
+skill document.register        ok=1 sha=0917f127694ff630
+skill env.hygiene              ok=1 sha=dec16e68f8f78d14
+skill error.report             ok=1 sha=16007e2f9da992f1
+skill expense.draft            ok=1 sha=407c6bb02686320e
+skill integration.inventory    ok=1 sha=8e577bd1c2e71991
+skill invoice.draft            ok=1 sha=7d5092851aea819d
+skill job.intake               ok=1 sha=4e9bd1473d929408
+skill job.route                ok=1 sha=63b1fb83d8e481b5
+skill knowledge.index          ok=1 sha=cfcae4b5da8becfa
+skill lead.capture             ok=1 sha=560925a611317c0f
+skill lead.record              ok=1 sha=7833774933810d54
+skill order.record             ok=1 sha=14a02d5ff1ec1546
+skill owner.dashboard          ok=1 sha=7871131a848eb6d6
+skill progress.report          ok=1 sha=4bec6891c78efe90
+skill proposal.draft           ok=1 sha=b99e33940bbca443
+skill qa.check                 ok=1 sha=25d77765338dd881
+skill quotation.draft          ok=1 sha=8782268df76d0d81
+skill report.version           ok=1 sha=91d769d033a61fa9
+skill research.report          ok=1 sha=b3f0672497393f03
+skill seo.audit.local          ok=1 sha=a428621828218eb1
+skill source.verify            ok=1 sha=9077786236b8a5e9
+skill status.transition        ok=1 sha=d47a4b1a133eaa94
+skill supplier.record          ok=1 sha=c1a7ca6e3025be75
+skill support.ticket           ok=1 sha=ee3f1e9f9bf21af8
+skill system.audit             ok=1 sha=b1c317675670995f
+skill_executed_ok=34
+skill_failed=0
+--- create + route + persist a real job (explicit department) ---
+{"ok":true,"phase":"P0-credential-free","job":{"jobId":"job_mvztf21pp1b2fr","title":"Phase 0 explicit job 20261102T221308Z","department":"10","departmentName":"Project Management & Operations","division":"PMO","jobRole":"Project Manager","assignee":{"type":"unassigned","id":""},"clientId":"","projectId":"","description":"","inputFiles":[],"expectedDeliverable":"","requiredSkills":[],"tools":["department.registry","jo
+created_job_id=job_mvztf21pp1b2fr
+--- keyword routing (no departmentId) ---
+"routing":{"id":"04","basis":"keyword","matchedKeywords":["research","report"]
+"routing":{"id":"04","basis":"keyword","matchedKeywords":["research","report"]
+"department":"04"
+--- invalid routing is rejected (deferred department) ---
+{"ok":false,"error":"department 06 is deferred; activation requires separate Owner approval"}
+--- status transition (real state machine) ---
+"status":"REVIEW"
+--- illegal transition is rejected ---
+{"ok":false,"error":"transition REVIEW -> COMPLETE is not allowed"}
+--- reload: prove the job was persisted, not just returned ---
+job_present_after_reload 1
+"summary":{"total":7,"byStatus":{"NEW":4,"REVIEW":3}
+
+--- local connection state stays honest ---
+"connected":0
+PHASE0_VERIFICATION_DONE=20261102T221308Z
