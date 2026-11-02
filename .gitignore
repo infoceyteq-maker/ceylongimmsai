@@ -8,3 +8,5 @@ out/
 npm-debug.log*
 .vercel
 coverage/
+# Phase 0 local job store (runtime data, not source)
+data/gimms-jobs.json
