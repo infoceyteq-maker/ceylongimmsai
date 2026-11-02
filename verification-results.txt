@@ -1,0 +1,28 @@
+BASE=https://ai-gimms-hub.vercel.app
+/ 200
+/tasks 200
+/approvals 200
+/clients 200
+/agents 200
+/status 200
+/research 200
+/publishing 200
+/audience 200
+/connections 200
+/callcenter 200
+/memory 200
+/production 200
+--- bootstrap ---
+"storage":"postgres"
+"counts":{"tasks":6,"agents":6,"clients":2}
+logo-512.png 200
+scene3d_count 1
+api/connect 200
+{"ok":true,"storage":"postgres","channels":[{"id":"linkedin","name":"LinkedIn","note":"Page posting needs a company page token.","handle":"","scopes":["w_member_social"],"connected":false},{"id":"facebook","name":"Facebook Page","note":"Requires a Meta app rev
+--- create one task on the live site ---
+{"ok":true,"storage":"postgres","persisted":true,"task":{"id":"tk_mvzhhp73emtmzn","title":"Live verification 20261102T163917Z","description":"","status":"Draft","department":"Unassigned","clientId":"","due":"","runCount":0,"createdAt":"2026-11-02T16:39:17.967Z","updatedAt":"2026-11-02T16:39:17.967Z","createdBy":"info.ceyteq@gmail.com"},"count":7}
+--- reload: prove it is the DB, not memory ---
+title=Live verification 20261102T163917Z
+bootstrap_counts "counts":{"tasks":7,"agents":6,"clients":2}
+task_present_after_reload 1
+{"ok":true,"storage":"postgres","tasks":[{"id":"tk_mvzhhp73emtmzn","due":"","title":"Live verification 20261102T163917Z","status":"Draft","clientId":"","runCount":0,"createdAt":"2026-11-02T16:39:17.967Z","createdBy":"info.ceyteq@gmail.com","updatedAt":"2026-11

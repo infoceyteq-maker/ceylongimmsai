@@ -1,0 +1,20 @@
+{
+  "_note": "Fallback seed only. No invented business records. Live data is read from public.hub_state via SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.",
+  "tasks": [],
+  "agents": [],
+  "clients": [],
+  "channels": [
+    { "id": "linkedin", "name": "LinkedIn", "handle": "", "connected": false, "note": "A real company page token is required." },
+    { "id": "facebook", "name": "Facebook Page", "handle": "", "connected": false, "note": "A real Meta app review + page token is required." },
+    { "id": "instagram", "name": "Instagram", "handle": "", "connected": false, "note": "A real business account token is required." },
+    { "id": "x", "name": "X", "handle": "", "connected": false, "note": "A real API key with write access is required." },
+    { "id": "youtube", "name": "YouTube", "handle": "", "connected": false, "note": "A real OAuth credential is required." }
+  ],
+  "publishes": [],
+  "outputs": [],
+  "research": [],
+  "audience": [],
+  "calls": [],
+  "conversations": [],
+  "audit": []
+}
