@@ -7,12 +7,22 @@ on:
     paths: [.github/workflows/verify-live.yml]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run live verification
-        run: bash scripts/verify-live.sh
+        with:
+          ref: arena/92b892eb-ceylongimmsai
+      - name: Run live verification and save real output
+        run: bash scripts/verify-live.sh 2>&1 | tee verification-results.txt
+      - name: Publish results to the branch
+        if: always()
+        run: |
+          git config user.name "arena-verify"
+          git config user.email "arena-verify@users.noreply.github.com"
+          git add -f verification-results.txt
+          git diff --cached --quiet || git commit -m "Record live verification results"
+          git push origin HEAD:arena/92b892eb-ceylongimmsai
