@@ -10,3 +10,6 @@ npm-debug.log*
 coverage/
 # Phase 0 local job store (runtime data, not source)
 data/gimms-jobs.json
+# P1-01 local Dept 01 runtime state + generated documents (not source)
+data/gimms-dept01.json
+data/dept01-artifacts/

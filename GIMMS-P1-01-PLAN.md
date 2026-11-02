@@ -138,3 +138,22 @@ The four external command packets in `GIMMS-EXTERNAL-COMMAND-PACK.md` remain **p
 a docs-only PR at the Owner's explicit request. That PR adds **one Markdown plan file** — no
 implementation. The Tier A / Tier B / Full LIVE scope decision in §2 is **still unanswered**, so
 nothing in §3 is being built yet. A PR merge is not an implementation approval.
+
+---
+
+**Implementation status postscript (2026-11-03, added on `arena/219acd89-ceylongimmsai`):**
+The Owner subsequently issued a separate `GIMMS — HR, FINANCE & ADMINISTRATION COMPLETE
+DEPARTMENT IMPLEMENTATION COMMAND` (P0, full functional implementation). That command explicitly
+authorises **local, credential-free Department 01 implementation and local testing**, which
+supersedes the "approval still pending" wording above **for that native local scope only**.
+A local implementation has now been built and tested: 80 new native skills behind the existing
+single `/api/skills` gateway, real `.docx/.xlsx/.pptx/.pdf/.eml/.ics` files, 10 agent contracts,
+EMP-0001 proposal, versioned approvals, and a real HR→Management→Production→QA→OWNER APPROVAL
+job chain. `DEPT01_TESTS_PASS=88`, `DEPT01_TESTS_FAIL=0`, `skill_executed_ok=114`, `skill_failed=0`.
+
+This postscript does NOT change the Tier B / Tier C / Full LIVE gates: external integrations,
+credentials, live financial accounts, payments, payroll execution, secure login, e-signature,
+production deployment and purchases still require separate Owner approval plus authenticated tests.
+Current status remains `connected:0` / `MANUAL` / no deploy / no 100% completion claim.
+See `GIMMS-DEPT01-IMPLEMENTATION-REPORT.md`, `GIMMS-DEPT01-INTEGRATION-REQUESTS.md` and
+`dept01-verification.txt`. The historical plan text above is retained as written at PR #5 time.

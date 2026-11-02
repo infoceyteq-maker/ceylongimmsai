@@ -29,6 +29,8 @@ import {
   hash,
   type Job,
 } from "@/lib/jobs";
+import { DEPT01_SKILL_IDS, DEPT01_CHECK_IDS, DEPT01_DESCRIPTIONS } from "@/lib/dept01-catalog";
+import { runDept01Skill } from "@/lib/dept01-skills";
 
 const ROOT = process.cwd();
 
@@ -123,11 +125,18 @@ const DESCRIPTIONS: Record<string, string> = {
 
 const DECLARED_IDS = Array.from(new Set(DEPARTMENTS.flatMap((department) => department.safeSkills))).sort();
 
+function isCheckSkill(id: string): boolean {
+  return SPECIFIC_IDS.has(id) || DEPT01_CHECK_IDS.has(id);
+}
+
 export const SKILLS: SkillDefinition[] = DECLARED_IDS.map((id) => ({
   id,
   departmentId: skillFor(id)?.id ?? "10",
-  kind: (SPECIFIC_IDS.has(id) ? "check" : "draft") as SkillKind,
-  description: DESCRIPTIONS[id] ?? "Validates input and produces a versioned DRAFT record (no external action)",
+  kind: (isCheckSkill(id) ? "check" : "draft") as SkillKind,
+  description:
+    DESCRIPTIONS[id] ??
+    DEPT01_DESCRIPTIONS[id] ??
+    "Validates input and produces a versioned DRAFT record (no external action)",
   requiresExternal: false as const,
 }));
 
@@ -143,7 +152,7 @@ function makeResult(
     ok,
     skillId,
     departmentId: skillFor(skillId)?.id ?? "10",
-    kind: (SPECIFIC_IDS.has(skillId) ? "check" : "draft") as SkillKind,
+    kind: (isCheckSkill(skillId) ? "check" : "draft") as SkillKind,
     executedAt: new Date().toISOString(),
     steps,
     evidence,
@@ -632,6 +641,12 @@ export function runSkill(skillId: string, payload: Record<string, unknown> = {})
   if (!definition) {
     return makeResult(skillId, [], {}, [], false, `unknown skill: ${skillId}`);
   }
+  // P1-01: Dept 01's 80 native handlers share this SINGLE gateway. No duplicate
+  // API, no second dispatcher, no new external integration.
+  if (DEPT01_SKILL_IDS.has(skillId)) {
+    const result = runDept01Skill(skillId, payload);
+    return makeResult(skillId, result.steps, result.evidence, result.blocked, result.ok, result.error);
+  }
   if (SPECIFIC_IDS.has(skillId)) return runSpecific(skillId, payload);
   return runDraftSkill(skillId, payload);
 }
@@ -641,7 +656,7 @@ export function skillsSummary() {
     total: SKILLS.length,
     checkSkills: SKILLS.filter((skill) => skill.kind === "check").length,
     draftSkills: SKILLS.filter((skill) => skill.kind === "draft").length,
-    requiresExternal: 0,
+    requiresExternal: SKILLS.filter((skill) => skill.requiresExternal).length,
     byDepartment: DEPARTMENTS.filter((d) => d.status === "active-p0").map((d) => ({
       id: d.id,
       name: d.name,
