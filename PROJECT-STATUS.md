@@ -113,3 +113,25 @@ is not engineering work: it is **one asset (the original logo), two owner decisi
 keys), two optional clicks (private repo + Git connect) and one postponed decision (Supabase
 isolation)**. The original v7.2.0 application cannot be restored until its source/zip is supplied;
 until then this is a working, spec-faithful implementation, clearly labelled as such.
+
+---
+
+## 8. Completion date — answer to "කවදද ඉවර කරන්න පුළුවන්?"
+
+**Today is 2026-11-02 (Asia/Colombo). No fixed future calendar date is promised**, because the
+remaining items are blocked on owner input, not on engineering capacity. Inventing a deadline
+would be dishonest.
+
+| If the owner supplies… | Completion date | Work left on my side |
+|---|---|---|
+| Original logo **+** login-gate decision, today 2026-11-02 | **2026-11-02, same day** | logo swap + `tsc` + `build` + redeploy + verify ≈ 5–10 min; Supabase Auth gate + UAT ≈ 30–60 min |
+| Original logo only, today | **2026-11-02** for the brand asset | ≈ 5–10 min; login gate stays open until decided |
+| Nothing today | **No date can be stated** — completion moves to the day the file/decision arrives | — |
+| PRIVATE repo + Git-connect clicks | Same day those clicks happen | `403 createRepository` prevents me from doing this myself |
+
+The two owner clicks (GitHub web UI, Vercel Settings → Git) and the optional Pro billing decision
+are outside my control, so no invented deadline is given for them.
+
+`scripts/apply-original-logo.sh` is ready: it copies the supplied file **byte-for-byte** into
+`public/logo-512.png` (no invert / redraw / recolour / crop) and prints SHA-256 and dimensions,
+so the swap + redeploy is one verified step the moment the file arrives.
