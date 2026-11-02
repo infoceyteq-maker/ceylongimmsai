@@ -1,0 +1,18 @@
+name: Verify live AI GIMMS Hub
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [arena/92b892eb-ceylongimmsai]
+    paths: [.github/workflows/verify-live.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run live verification
+        run: bash scripts/verify-live.sh
