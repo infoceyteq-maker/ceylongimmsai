@@ -11,6 +11,7 @@ const NAV: { href: string; label: string }[] = [
   { href: "/clients", label: "Clients" },
   { href: "/agents", label: "Agents" },
   { href: "/departments", label: "Departments" },
+  { href: "/departments/01", label: "Dept 01 · HR/Finance" },
   { href: "/status", label: "Status" },
   { href: "/research", label: "Research" },
   { href: "/publishing", label: "Publishing" },

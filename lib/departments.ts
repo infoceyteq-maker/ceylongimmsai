@@ -9,6 +9,8 @@
  * is not functional just because it appears here or in a menu (Master Doc section 3).
  */
 
+import { DEPT01_SKILL_IDS_LIST } from "@/lib/dept01-catalog";
+
 export type DepartmentStatus = "active-p0" | "deferred";
 
 export type Division = {
@@ -52,8 +54,23 @@ export const DEPARTMENTS: Department[] = [
     ],
     owns: ["employee records", "budgets", "expense drafts", "invoice drafts", "receivables register", "document register"],
     mustNot: ["execute payments", "run payroll", "move money", "give legal advice", "sign agreements"],
-    safeSkills: ["invoice.draft", "expense.draft", "document.register"],
-    externalNeeds: ["payment gateway API", "accounting API", "e-signature service"],
+    // P1-01: 80 native, credential-free Dept 01 handlers behind the SAME skills gateway.
+    // Names only — none of the external services below is connected or tested.
+    safeSkills: ["invoice.draft", "expense.draft", "document.register", ...DEPT01_SKILL_IDS_LIST],
+    externalNeeds: [
+      "payment gateway API",
+      "accounting API",
+      "e-signature service",
+      "Microsoft 365 / Graph API (Word, Excel, PowerPoint, Outlook, SharePoint)",
+      "Google Workspace APIs (Docs, Sheets, Slides, Drive, Gmail, Calendar)",
+      "general-purpose PDF library (AcroForm, arbitrary PDFs)",
+      "OCR / scanned PDF text extraction",
+      "SMTP / email delivery API",
+      "approved auth provider (Supabase Auth) for EMP-0001 secure login",
+      "qualified accountant / statutory tax rate source",
+      "qualified legal professional review",
+      "LLM / AI SDK / MCP server for the 10 role-based agents",
+    ],
     routeKeywords: ["invoice", "expense", "payroll", "employee", "budget", "payment", "contract", "agreement", "receivable", "hr", "salary"],
   },
   {
