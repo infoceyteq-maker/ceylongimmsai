@@ -1,0 +1,53 @@
+DEV_TEAM_CI_BASE=http://127.0.0.1:3000
+DEV_TEAM_CI_STAMP=20261103T003755Z
+SCOPE=Real Developer Team core verification (CI-safe, no git-status assertions)
+TEST_PASSWORD=generated locally; NEVER printed
+
+--- 1. Connection activation layer ---
+dev_team status=DEVELOPER TEAM CORE CONNECTED LOCALLY + CI CONFIGURED — AI MODELS AND WORKSPACE ACCOUNTS BLOCKED connected=7 blocked=7 aiModels=0
+PASS | Developer Team endpoint returns 200
+PASS | real connections > 0 and AI models connected = 0
+PASS | 0 credential values / 0 emails / 0 purchases / 0 deploys
+PASS | activation layer is fail-closed
+probes total=15 reachable=5 unreachable=10
+PASS | real network probes executed for every connection
+PASS | every probe reports an honest status (no fabricated success)
+openai_probe reachable=false http=0
+PASS | OpenAI probe result is reported as-is (reachable OR unreachable, never faked)
+activate http=403 activated=false
+PASS | activation is REFUSED (no placeholder connection)
+PASS | unapproved authenticated test is refused
+
+--- 2. Owner registration + real-time command ---
+PASS | Owner registers with a real local login
+PASS | no real Owner details invented
+command http=200 jobId=job_mvzyl98pf1cylw checks=11/11 sse_frames=30
+PASS | real command creates a real job
+PASS | 8 real local operations + 11/11 real assertions
+PASS | AI developer assignment BLOCKED, not simulated
+PASS | real SSE progress events
+PASS | honesty: 0 model calls / 0 external calls / 0 emails
+PASS | conversation + job persisted, job at APPROVAL
+PASS | real versioned Owner review
+
+--- 3. Honesty regression ---
+PASS | 114 local skills unchanged
+PASS | /api/connect still 0
+PASS | demo provider / MANUAL publishing
+PASS | registry 10/7/3/69/156 unchanged
+PASS | Skills & Tools Registry: 0 AI SDKs / 0 new packages
+PASS | no .env.local
+page / http=200
+PASS | page / served
+page /chat http=200
+PASS | page /chat served
+page /developer-team http=200
+PASS | page /developer-team served
+
+--- 4. Cleanup ---
+PASS | local test Owner/chat state removed
+PASS | no password value in evidence
+
+DEV_TEAM_CI_TESTS_PASS=29
+DEV_TEAM_CI_TESTS_FAIL=0
+HONESTY=Real connections/probes/jobs/tests/events/reviews. 0 AI models connected, 0 emails, 0 purchases, 0 deploys, no simulated success.

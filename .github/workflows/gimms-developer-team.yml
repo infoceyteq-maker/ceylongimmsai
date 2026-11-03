@@ -1,0 +1,70 @@
+name: GIMMS Developer Team verification
+
+# Uses the EXISTING authorized GitHub Actions integration only.
+# No deploy, no purchase, no personal account, no external credential.
+# `permissions: contents: read` — this workflow never pushes back to the repo.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install EXISTING locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: Production build
+        run: npx next build
+
+      # Server + harness share ONE step so the background process is guaranteed
+      # to stay alive for the whole verification run.
+      - name: Run REAL Developer Team verification
+        run: |
+          set -e
+          npm run dev > /tmp/gimms-next-dev.log 2>&1 &
+          DEV_PID=$!
+          trap 'kill "$DEV_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/api/connect > /dev/null 2>&1; then
+              echo "DEV_SERVER_READY"
+              READY=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$READY" -ne 1 ]; then
+            echo "DEV_SERVER_FAILED"
+            cat /tmp/gimms-next-dev.log
+            exit 1
+          fi
+          node scripts/verify-developer-team-ci.mjs
+
+      - name: Upload real evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gimms-developer-team-verification
+          path: developer-team-ci-verification.txt
+          if-no-files-found: warn
