@@ -1,5 +1,5 @@
-DEV_TEAM_CI_BASE=http://127.0.0.1:3000
-DEV_TEAM_CI_STAMP=20261103T004206Z
+DEV_TEAM_CI_BASE=http://localhost:3000
+DEV_TEAM_CI_STAMP=20261103T123816Z
 SCOPE=Real Developer Team core verification (CI-safe, no git-status assertions)
 TEST_PASSWORD=generated locally; NEVER printed
 
@@ -21,7 +21,7 @@ PASS | unapproved authenticated test is refused
 --- 2. Owner registration + real-time command ---
 PASS | Owner registers with a real local login
 PASS | no real Owner details invented
-command http=200 jobId=job_mvzyqma0l6j8nv checks=11/11 sse_frames=30
+command http=200 jobId=job_mw0oblw0azl6gr checks=11/11 sse_frames=30
 PASS | real command creates a real job
 PASS | 8 real local operations + 11/11 real assertions
 PASS | AI developer assignment BLOCKED, not simulated
