@@ -1,0 +1,82 @@
+SECURITY_REGRESSION_BASE=http://127.0.0.1:3011
+SECURITY_REGRESSION_STAMP=20261103T205304Z
+SCOPE=local production-mode auth/redaction/CSRF/session regressions; no external calls
+BOOTSTRAP_TOKEN_PRESENT=true
+TEST_PASSWORD=generated locally; NEVER printed
+
+--- 1. Bootstrap redaction and anonymous authorization ---
+PASS | anonymous: bootstrap HTTP 200 | got 200
+PASS | anonymous: authenticated=false
+PASS | anonymous: clients+audit listed as redacted
+PASS | anonymous: clients array absent
+PASS | anonymous: audit array absent
+PASS | forged session: bootstrap HTTP 200 | got 200
+PASS | forged session: authenticated=false
+PASS | forged session: clients+audit listed as redacted
+PASS | forged session: clients array absent
+PASS | forged session: audit array absent
+
+--- 2. Security headers and admin gate ---
+PASS | Content-Security-Policy present
+PASS | X-Content-Type-Options nosniff
+PASS | Referrer-Policy present
+PASS | Permissions-Policy present
+PASS | X-Powered-By absent
+PASS | anonymous /admin/auto-pilot redirects to login | got 307
+PASS | anonymous /api/admin/security -> 401 | got 401
+
+--- 3. Production first-run registration gate ---
+PASS | registration without bootstrap token -> 403 | got 403
+PASS | registration with wrong bootstrap token -> 403 | got 403
+PASS | registration with correct bootstrap token -> 201 | got 201
+PASS | registration persisted locally
+PASS | production session cookie is __Host- prefixed
+PASS | session cookie Secure
+PASS | session cookie HttpOnly
+PASS | session cookie SameSite=Lax
+PASS | session cookie Path=/
+PASS | owner bootstrap authenticated=true
+PASS | owner bootstrap receives full state
+
+--- 4. CSRF and production write gates ---
+PASS | authenticated cross-origin POST -> 403 | got 403
+PASS | authenticated missing-origin POST -> 403 | got 403
+PASS | anonymous production POST /api/tasks -> 401 | got 401
+PASS | anonymous production POST /api/jobs -> 401 | got 401
+PASS | anonymous production POST /api/skills -> 401 | got 401
+PASS | anonymous production POST /api/dept01 -> 401 | got 401
+PASS | anonymous production POST /api/developer-team -> 401 | got 401
+PASS | anonymous production POST /api/production/ai-team -> 401 | got 401
+PASS | anonymous production POST /api/chat -> 401 | got 401
+PASS | anonymous production POST /api/agent/execute -> 401 | got 401
+PASS | anonymous production POST /api/agent/comms -> 401 | got 401
+PASS | anonymous production POST /api/admin/agent -> 401 | got 401
+
+--- 5. Session lifecycle ---
+PASS | logout -> 200 | got 200
+PASS | after logout: bootstrap HTTP 200 | got 200
+PASS | after logout: authenticated=false
+PASS | after logout: clients+audit listed as redacted
+PASS | after logout: clients array absent
+PASS | after logout: audit array absent
+PASS | wrong password -> 401 | got 401
+PASS | correct password -> 200 + session | got 200
+PASS | change-password with wrong current password -> 400 | got 400
+PASS | change-password -> 200 | got 200
+PASS | old session after password change: bootstrap HTTP 200 | got 200
+PASS | old session after password change: authenticated=false
+PASS | old session after password change: clients+audit listed as redacted
+PASS | old session after password change: clients array absent
+PASS | old session after password change: audit array absent
+PASS | login with new password -> 200 | got 200
+
+--- 6. Login abuse protection ---
+PASS | repeated failed logins eventually -> 429 | last status 429
+
+--- 7. Cleanup ---
+PASS | test Owner state removed
+PASS | no password or bootstrap token value printed
+
+SECURITY_REGRESSION_TESTS_PASS=59
+SECURITY_REGRESSION_TESTS_FAIL=0
+HONESTY=Local production-mode tests only. No deploy, no production DB write, no external account connection, no secret value printed.
