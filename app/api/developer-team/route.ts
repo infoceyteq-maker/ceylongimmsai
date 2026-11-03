@@ -44,7 +44,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = requireOwnerWrite(request);
+  const auth = await requireOwnerWrite(request);
   if (!auth.ok) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
   }

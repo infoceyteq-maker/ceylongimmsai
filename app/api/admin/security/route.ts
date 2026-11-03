@@ -80,13 +80,13 @@ function auditRouteAuth(): { routes: RouteAuth[]; ungated: string[] } {
 }
 
 export async function GET(request: Request) {
-  const auth = requireOwner(request);
+  const auth = await requireOwner(request);
   if (!auth.ok) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
   }
 
   const audit = auditRouteAuth();
-  const status = ownerStatus();
+  const status = await ownerStatus();
 
   return NextResponse.json(
     {

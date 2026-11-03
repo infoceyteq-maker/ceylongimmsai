@@ -51,7 +51,7 @@ const VOICE_INSTRUCTIONS = [
 ].join(" ");
 
 export async function POST(request: Request) {
-  const auth = requireOwnerWrite(request);
+  const auth = await requireOwnerWrite(request);
   if (!auth.ok) return NextResponse.json({ ok: false, ...authTag(auth), error: auth.error }, { status: auth.status, headers: NO_STORE });
 
   const limit = rateLimit(clientKey(request, "agent-voice"), RATE_LIMITS.agentCommand.limit, RATE_LIMITS.agentCommand.windowMs);

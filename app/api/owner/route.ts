@@ -46,14 +46,14 @@ function clearCookies(response: NextResponse): NextResponse {
  * chat, never logged, never returned and never stored in plaintext.
  */
 export async function GET(request: Request) {
-  const profile = verifySession(sessionFromRequest(request));
-  const status = ownerStatus();
+  const profile = await verifySession(sessionFromRequest(request));
+  const status = await ownerStatus();
   return NextResponse.json(
     {
       ...status,
       authenticated: Boolean(profile),
       // Presence flags only — never the values.
-      registrationBlockedReason: status.registered ? undefined : registrationGate(request).reason,
+      registrationBlockedReason: status.registered ? undefined : (await registrationGate(request)).reason,
     },
     { headers: NO_STORE },
   );
@@ -71,14 +71,14 @@ export async function POST(request: Request) {
   if (action === "register") {
     // "Already registered" is a 409 CONFLICT, not an authorisation failure. Check it
     // first so a duplicate call gets the honest status instead of a misleading 403.
-    if (ownerStatus().registered) {
+    if ((await ownerStatus()).registered) {
       return NextResponse.json(
         { ok: false, error: "Owner account already registered. Registration is closed; use login or change-password." },
         { status: 409, headers: NO_STORE },
       );
     }
 
-    const gate = registrationGate(request);
+    const gate = await registrationGate(request);
     if (!gate.ok) {
       return NextResponse.json({ ok: false, error: gate.reason }, { status: 403, headers: NO_STORE });
     }
@@ -91,18 +91,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = registerOwner(body);
+    const result = await registerOwner(body);
     if (!result.ok || !result.sessionToken) {
       return NextResponse.json({ ok: false, error: result.error }, { status: 409, headers: NO_STORE });
     }
     const cookie = ownerSessionCookie(result.sessionToken);
+    const currentStatus = await ownerStatus();
     const response = NextResponse.json(
       {
         ok: true,
         profile: result.profile,
         persisted: result.persisted,
-        durable: ownerStatus().durable,
-        security: ownerStatus().security,
+        durable: currentStatus.durable,
+        security: currentStatus.security,
         claimedVia: gate.via,
         note: "Owner account created. Password was never stored in plaintext or shown in chat.",
       },
@@ -121,14 +122,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = loginOwner(body.password);
+    const result = await loginOwner(body.password);
     if (!result.ok || !result.sessionToken) {
       return NextResponse.json({ ok: false, error: result.error }, { status: 401, headers: NO_STORE });
     }
     clearRateLimit(clientKey(request, "owner-login"));
     const cookie = ownerSessionCookie(result.sessionToken);
+    const loginStatus = await ownerStatus();
     const response = NextResponse.json(
-      { ok: true, profile: result.profile, durable: ownerStatus().durable, security: ownerStatus().security },
+      { ok: true, profile: result.profile, durable: loginStatus.durable, security: loginStatus.security },
       { headers: NO_STORE },
     );
     response.cookies.set(cookie.name, cookie.value, cookie.options);
@@ -136,15 +138,15 @@ export async function POST(request: Request) {
   }
 
   if (action === "logout") {
-    logoutOwner(sessionFromRequest(request));
+    await logoutOwner(sessionFromRequest(request));
     const response = NextResponse.json({ ok: true, note: "Session removed." }, { headers: NO_STORE });
     return clearCookies(response);
   }
 
   if (action === "change-password") {
-    const profile = verifySession(sessionFromRequest(request));
+    const profile = await verifySession(sessionFromRequest(request));
     if (!profile) return NextResponse.json({ ok: false, error: "Owner login required." }, { status: 401, headers: NO_STORE });
-    const result = changeOwnerPassword(body.currentPassword, body.newPassword);
+    const result = await changeOwnerPassword(body.currentPassword, body.newPassword);
     if (!result.ok) return NextResponse.json(result, { status: 400, headers: NO_STORE });
     const response = NextResponse.json(
       { ok: true, note: "Password changed. All sessions invalidated — log in again." },

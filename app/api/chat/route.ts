@@ -14,13 +14,13 @@ const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
  * await a REAL Owner review. 0 AI models connected — no simulated success.
  */
 export async function GET(request: Request) {
-  const auth = requireOwner(request);
+  const auth = await requireOwner(request);
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
   return NextResponse.json(chatOverview(auth.profile), { headers: NO_STORE });
 }
 
 export async function POST(request: Request) {
-  const auth = requireOwner(request);
+  const auth = await requireOwner(request);
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
 
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;

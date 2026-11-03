@@ -71,7 +71,7 @@ const API_INTENTS: readonly IntentId[] = ["EMAIL_TRIAGE", "EMAIL_DRAFT_REPLY", "
 
 export async function GET(request: Request) {
   // Read-only, but still Owner-only: the capability matrix describes the attack surface.
-  const auth = requireOwner(request);
+  const auth = await requireOwner(request);
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
 
   const { jobs, mode, durable } = await listJobs(20);
@@ -112,7 +112,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = requireOwnerWrite(request);
+  const auth = await requireOwnerWrite(request);
   if (!auth.ok) return NextResponse.json({ ok: false, ...authTag(auth), error: auth.error }, { status: auth.status, headers: NO_STORE });
 
   const limit = rateLimit(clientKey(request, "agent-execute"), RATE_LIMITS.agentCommand.limit, RATE_LIMITS.agentCommand.windowMs);

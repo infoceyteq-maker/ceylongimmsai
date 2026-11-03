@@ -35,11 +35,11 @@ export type WriteAuth =
   | { ok: true; mode: "development-anonymous"; profile: null }
   | { ok: false; status: number; error: string };
 
-export function requireOwnerWrite(request: Request): WriteAuth {
+export async function requireOwnerWrite(request: Request): Promise<WriteAuth> {
   const guard = guardMutation(request);
   if (!guard.ok) return { ok: false, status: guard.status, error: guard.error };
 
-  const auth = requireOwner(request);
+  const auth = await requireOwner(request);
   if (auth.ok) return { ok: true, mode: "owner", profile: auth.profile };
 
   if (!isProduction) {
