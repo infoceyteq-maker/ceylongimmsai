@@ -298,12 +298,16 @@ async function main() {
   // Consequence: this harness expects a COMMITTED tree. If you are mid-edit, commit
   // first — the failure then means exactly what it says, not a stale frozen snapshot.
   const EVIDENCE_ARTIFACT = /(^|\/)([\w.-]*-)?verification[\w.-]*\.txt$/;
+  // Next.js REWRITES this file on every dev/build run (`.next/dev/types` vs `.next/types`).
+  // It says "This file should not be edited" — it is generated, so it is not source.
+  const NEXT_GENERATED = new Set(["next-env.d.ts"]);
+  const tolerated = (file) => EVIDENCE_ARTIFACT.test(file) || NEXT_GENERATED.has(file);
   const modifiedPaths = modifiedTracked.map((line) => line.replace(/^\S+\s+/, ""));
-  const modifiedSource = modifiedPaths.filter((file) => !EVIDENCE_ARTIFACT.test(file));
+  const modifiedSource = modifiedPaths.filter((file) => !tolerated(file));
   check("harness run dirties no tracked source/config file", modifiedSource.length === 0, modifiedSource.join(","));
   check(
-    "only committed evidence .txt artifacts may be dirty",
-    modifiedPaths.length === modifiedTracked.length && modifiedTracked.every((line, index) => EVIDENCE_ARTIFACT.test(modifiedPaths[index])),
+    "only evidence .txt artifacts and Next-generated next-env.d.ts may be dirty",
+    modifiedPaths.length === modifiedTracked.length && modifiedPaths.every((file) => tolerated(file)),
     modifiedPaths.join(","),
   );
   log("");
