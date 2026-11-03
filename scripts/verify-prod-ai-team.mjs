@@ -43,7 +43,7 @@ async function req(target, options = {}) {
 }
 const get = (target) => req(target, { cache: "no-store" });
 const post = (target, body) =>
-  req(target, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  req(target, { method: "POST", headers: { "Content-Type": "application/json", Origin: BASE, "Sec-Fetch-Site": "same-origin" }, body: JSON.stringify(body) });
 
 async function main() {
   log(`PROD_AI_TEAM_BASE=${BASE}`);

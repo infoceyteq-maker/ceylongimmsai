@@ -7,6 +7,14 @@
 > hub can go live. `public/logo-512.png` is a **placeholder wordmark**, not the supplied logo.
 > See `HANDOFF.md` for the verified state of GitHub / Vercel / Supabase.
 
+## Cloud-only development (no local terminal required)
+
+The owner's Windows machine cannot run PowerShell or Node. **Use GitHub Codespaces:**
+open the repo on github.com, press `.`, and you get a bash terminal in the browser.
+See [`docs/PHASE-TERMINAL-COMMANDS.md`](docs/PHASE-TERMINAL-COMMANDS.md) — every command
+on that page is bash and Codespaces-compatible. `.devcontainer/devcontainer.json`
+configures it automatically.
+
 ## Run
 
 ```bash
@@ -33,14 +41,60 @@ If Turbopack throws after a reinstall, delete `.next/` and restart.
 
 ## Pages
 
-`/` `/tasks` `/approvals` `/clients` `/agents` `/status` `/research` `/publishing`
-`/audience` `/connections` `/callcenter` `/memory` `/production`
+Public hub: `/` `/tasks` `/approvals` `/clients` `/agents` `/status` `/research`
+`/publishing` `/audience` `/connections` `/callcenter` `/memory` `/production` `/chat`
+
+Owner-only: `/admin/login` · `/admin/auto-pilot` (gated by `proxy.ts` + session check)
 
 ## APIs
 
-- `GET /api/bootstrap` → `{ provider: "demo", storage, counts, connected, state }`
-- `GET|POST /api/tasks` → list / create a task (persists in postgres)
+**Read routes** (anonymous, no secrets, internals stripped):
+
+- `GET /api/bootstrap` → counts + state; `clients` and `audit` are **redacted** for
+  anonymous callers and listed in `redacted`
 - `GET /api/connect` → channels, `connected: 0`; `POST` returns 403 (no real key)
+- `GET /api/jobs` `/api/skills` `/api/departments` `/api/dept01` `/api/developer-team`
+  `/api/production/ai-team` `/api/skills-tools`
+
+**Mutating routes** — every one requires an Owner session (`requireOwnerWrite`), or
+returns **401 in production**. Development allows anonymous writes so the CI harness
+works, and stamps `authMode: "development-anonymous"` on the response.
+
+`/api/owner` · `/api/chat` · `/api/tasks` · `/api/jobs` · `/api/skills`
+`/api/dept01` · `/api/developer-team` · `/api/production/ai-team`
+
+**Owner-only admin:**
+
+- `/api/admin/agent` — plan / approve / run / cancel Auto-Pilot jobs
+- `/api/admin/security` — live posture report: presence flags, route-auth audit, policy
+- `/api/agent/callback` — worker callback, authenticated by a single-use per-job lease
+
+## Security
+
+| Control | Where |
+|---|---|
+| Security headers (CSP, nosniff, Referrer-Policy, Permissions-Policy, HSTS) | `proxy.ts` |
+| CSRF (Origin + Sec-Fetch-Site + Referer) on every mutation | `lib/request-guard.ts` |
+| Owner write gate | `lib/api-auth.ts` |
+| Rate limiting + lockout (per-instance, **not** a global quota) | `lib/rate-limit.ts` |
+| Child-process allowlist (`git --version`, `node --version` only) | `lib/exec-guard.ts` |
+| Lazy, presence-only env access | `lib/env.ts` |
+| `__Host-` + Secure session cookie, atomic session file | `lib/owner-auth.ts` |
+
+Full findings: [`PHASE1-SECURITY-DIAGNOSTIC.md`](PHASE1-SECURITY-DIAGNOSTIC.md)
+
+## GIMMS Auto-Pilot (Phase 2)
+
+A real browser agent with human-like input simulation, run from `/admin/auto-pilot`.
+
+It navigates, reads, extracts and screenshots. It **composes** social posts and stops
+before submitting. It **refuses, in code**, unattended outbound actions such as
+auto-commenting and connection requests, because those breach the terms of every
+platform in scope and the penalty lands on the owner's own account.
+
+The browser runs in a separate worker (`agent-worker/`), not on Vercel — serverless
+functions time out long before a browsing session finishes. Architecture, deployment
+and the full rationale: [`PHASE2-AGENT-ARCHITECTURE.md`](PHASE2-AGENT-ARCHITECTURE.md)
 
 ## Guardrails
 
@@ -51,3 +105,5 @@ If Turbopack throws after a reinstall, delete `.next/` and restart.
 - Light ash page, black type `#0B0D0F`, green only for actions.
 - Live 3D = real-time 2D-canvas perspective in `components/Scene3D.tsx`, no Three.js, no CDN.
 - One contact only: `info.ceyteq@gmail.com`.
+- No unattended outbound social actions; the policy gate refuses them by default.
+- No secret value is ever logged, returned to a client, or written into evidence.

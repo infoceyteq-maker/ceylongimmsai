@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireOwnerWrite, authTag } from "@/lib/api-auth";
 import { SKILLS, runSkill, skillsSummary } from "@/lib/skills";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = requireOwnerWrite(request);
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
+  }
+
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const skillId = String(body.skillId ?? "").trim();
   if (!skillId) {
@@ -38,5 +44,5 @@ export async function POST(request: Request) {
   if (!result.ok) {
     return NextResponse.json(result, { status: 400, headers: NO_STORE });
   }
-  return NextResponse.json(result, { headers: NO_STORE });
+  return NextResponse.json({ ...result, ...authTag(auth) }, { headers: NO_STORE });
 }

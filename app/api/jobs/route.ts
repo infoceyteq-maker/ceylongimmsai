@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireOwnerWrite, authTag } from "@/lib/api-auth";
 import { createJob, listJobs, jobsSummary, transitionJob } from "@/lib/jobs";
 import { JOB_STATUSES } from "@/lib/jobs";
 
@@ -29,6 +30,11 @@ export async function GET() {
  * No external API, no payment, no posting, no production DB write.
  */
 export async function POST(request: Request) {
+  const auth = requireOwnerWrite(request);
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
+  }
+
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const action = String(body.action ?? "create").trim();
 
@@ -40,6 +46,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: true,
+        ...authTag(auth),
         phase: "P0-credential-free",
         job: created.job,
         routing: created.job?.routing,
@@ -63,7 +70,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: moved.error }, { status: 400, headers: NO_STORE });
     }
     return NextResponse.json(
-      { ok: true, job: moved.job, persisted: moved.persisted },
+      { ok: true, ...authTag(auth), job: moved.job, persisted: moved.persisted },
       { headers: NO_STORE },
     );
   }

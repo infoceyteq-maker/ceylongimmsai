@@ -47,7 +47,8 @@ const get = (target) => req(target, { cache: "no-store" });
 const post = (target, body) =>
   req(target, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    // Same-origin markers so the Phase 1 CSRF guard treats this like a real browser.
+    headers: { "Content-Type": "application/json", Origin: BASE, "Sec-Fetch-Site": "same-origin" },
     body: JSON.stringify(body),
   });
 

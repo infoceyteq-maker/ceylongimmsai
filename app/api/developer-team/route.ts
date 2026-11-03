@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireOwnerWrite, authTag } from "@/lib/api-auth";
 import {
   DEVELOPER_CONNECTIONS,
   developerConnectionsSummary,
@@ -43,6 +44,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = requireOwnerWrite(request);
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
+  }
+
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const action = String(body.action ?? "").trim();
   const id = String(body.id ?? body.connectionId ?? "").trim();
@@ -50,7 +56,7 @@ export async function POST(request: Request) {
   if (action === "probe") {
     if (!id) return NextResponse.json({ ok: false, error: "id is required" }, { status: 400, headers: NO_STORE });
     const result = await probeConnection(id);
-    return NextResponse.json({ action: "probe", ...result }, { headers: NO_STORE });
+    return NextResponse.json({ action: "probe", ...authTag(auth), ...result }, { headers: NO_STORE });
   }
 
   if (action === "probe-all") {
@@ -62,6 +68,7 @@ export async function POST(request: Request) {
       {
         action: "probe-all",
         ok: true,
+        ...authTag(auth),
         results,
         reachable: results.filter((item) => item.reachable).length,
         unreachable: results.filter((item) => !item.reachable && item.httpStatus === 0).length,
@@ -74,13 +81,13 @@ export async function POST(request: Request) {
   if (action === "test") {
     if (!id) return NextResponse.json({ ok: false, error: "id is required" }, { status: 400, headers: NO_STORE });
     const result = await testConnection(id, body.ownerApproved === true);
-    return NextResponse.json({ action: "test", ...result }, { status: result.ok ? 200 : 403, headers: NO_STORE });
+    return NextResponse.json({ action: "test", ...authTag(auth), ...result }, { status: result.ok ? 200 : 403, headers: NO_STORE });
   }
 
   if (action === "activate") {
     if (!id) return NextResponse.json({ ok: false, error: "id is required" }, { status: 400, headers: NO_STORE });
     const result = activateConnection(id, body.ownerApproved === true, body.authenticatedTestPassed === true);
-    return NextResponse.json({ action: "activate", ...result }, { status: 403, headers: NO_STORE });
+    return NextResponse.json({ action: "activate", ...authTag(auth), ...result }, { status: 403, headers: NO_STORE });
   }
 
   return NextResponse.json(

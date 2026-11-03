@@ -12,7 +12,7 @@
  * NO AI SDK is installed, NO external tool is called, NO tool is invented.
  */
 
-import { spawnSync } from "node:child_process";
+import { runAllowedProbe, isAllowedCommand, EXEC_POLICY } from "@/lib/exec-guard";
 import fs from "node:fs";
 import path from "node:path";
 import { SKILLS, skillsSummary } from "@/lib/skills";
@@ -28,18 +28,32 @@ export type LocalTool = {
   note: string;
 };
 
+/**
+ * Version probe through the single exec guard. A command that is not allowlisted is
+ * reported as BLOCKED_BY_POLICY and is NEVER executed — this closes the previous
+ * `npx tsc --version` path, which could download and run a package off the registry.
+ */
 function detect(id: string, command: string, args: string[], note: string): LocalTool {
-  let available = false;
-  let version = "NOT DETECTED";
-  try {
-    const result = spawnSync(command, args, { encoding: "utf8", timeout: 8000, stdio: ["ignore", "pipe", "pipe"] });
-    const output = `${result.stdout || ""}${result.stderr || ""}`.trim().split("\n")[0]?.trim() || "";
-    available = result.status === 0 || output.length > 0;
-    version = output.slice(0, 120);
-  } catch {
-    available = false;
+  const rendered = `${command} ${args.join(" ")}`.trim();
+  if (!isAllowedCommand(command, args)) {
+    return {
+      id,
+      command: rendered,
+      available: false,
+      version: "BLOCKED_BY_POLICY",
+      verifiedAt: new Date().toISOString(),
+      note: `${note} — not executed: only ${EXEC_POLICY.allowlist.join(", ")} are allowlisted.`,
+    };
   }
-  return { id, command: `${command} ${args.join(" ")}`.trim(), available, version, verifiedAt: new Date().toISOString(), note };
+  const result = runAllowedProbe(command, args);
+  return {
+    id,
+    command: rendered,
+    available: result.executed && result.ok,
+    version: result.executed ? result.output : `BLOCKED: ${result.reason}`,
+    verifiedAt: new Date().toISOString(),
+    note,
+  };
 }
 
 export function detectLocalTools(): LocalTool[] {

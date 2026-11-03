@@ -37,7 +37,14 @@ function check(name, condition, detail = "") {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function call(target, { method = "GET", body, cookie } = {}) {
-  const headers = { ...(cookie ? { Cookie: cookie } : {}), ...(body ? { "Content-Type": "application/json" } : {}) };
+  // A real browser always sends Origin on a mutating request, and the Phase 1
+  // CSRF guard requires it. The harness must behave like the browser it stands in for.
+  const headers = {
+    Origin: BASE,
+    ...(method !== "GET" ? { "Sec-Fetch-Site": "same-origin" } : {}),
+    ...(cookie ? { Cookie: cookie } : {}),
+    ...(body ? { "Content-Type": "application/json" } : {}),
+  };
   let response;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
@@ -61,7 +68,7 @@ async function call(target, { method = "GET", body, cookie } = {}) {
 function cookieFrom(setCookies) {
   for (const raw of setCookies || []) {
     const pair = String(raw).split(";")[0];
-    if (pair.startsWith("gimms_owner_session=")) return pair;
+    if (pair.startsWith("gimms_owner_session=") || pair.startsWith("__Host-gimms_owner_session=")) return pair;
   }
   return "";
 }

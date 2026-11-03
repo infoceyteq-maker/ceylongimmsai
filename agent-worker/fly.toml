@@ -1,0 +1,45 @@
+# Fly.io deployment for the GIMMS Auto-Pilot worker.
+#
+# One-time setup, all from the GitHub Codespaces bash terminal (or the Fly web UI):
+#   fly auth login
+#   fly launch --no-deploy --copy-config --name gimms-agent-worker
+#   fly secrets set WORKER_SECRET="$(openssl rand -hex 32)"
+#   fly deploy
+#
+# Then copy the SAME secret into Vercel as AGENT_WORKER_SECRET and set
+# AGENT_WORKER_URL=https://gimms-agent-worker.fly.dev
+
+app = "gimms-agent-worker"
+primary_region = "sin"          # Singapore — closest Fly region to Colombo
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  MAX_CONCURRENT = "2"
+  MAX_DURATION_MS = "240000"
+  HEADLESS = "1"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 8
+    soft_limit = 4
+
+# A browser needs real memory. 1 GB is the practical floor for Chromium + a page.
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
+
+# Chromium needs a writable /tmp and a couple of shared-memory pages.
+[[mounts]]
+  source = "gimms_worker_data"
+  destination = "/data"

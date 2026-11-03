@@ -1,0 +1,19 @@
+{
+  "name": "gimms-agent-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GIMMS Auto-Pilot browser worker — runs headless Chromium plans dispatched from the Vercel app. Deployed separately from Next.js.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "postinstall": "playwright install --with-deps chromium"
+  },
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  }
+}

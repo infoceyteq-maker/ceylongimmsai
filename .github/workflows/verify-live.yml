@@ -1,28 +1,50 @@
 name: Verify live AI GIMMS Hub
 
+# Cloud-only verification. Runs on GitHub's runner because Vercel's production URL
+# is not reachable from every sandbox, and because the Owner has no working local
+# terminal (Windows PowerShell is broken) — GitHub Actions IS the terminal.
+#
+# CHANGED IN PHASE 1: this workflow used to `git push` verification output back to a
+# hard-coded feature branch (`arena/92b892eb-...`) that no longer exists. It now has
+# read-only permissions and uploads the evidence as a build artifact instead. No
+# workflow can push to the repository any more.
+
 on:
   workflow_dispatch:
   push:
-    branches: [arena/92b892eb-ceylongimmsai]
-    paths: [.github/workflows/verify-live.yml]
+    branches: [main]
+    paths:
+      - ".github/workflows/verify-live.yml"
+      - "scripts/verify-live.sh"
+  schedule:
+    # Daily 02:30 UTC = 08:00 Asia/Colombo. Cheap uptime + security-header check.
+    - cron: "30 2 * * *"
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: verify-live
+  cancel-in-progress: true
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: arena/92b892eb-ceylongimmsai
-      - name: Run live verification and save real output
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run live verification
+        env:
+          # Set a repository variable named GIMMS_LIVE_BASE to override the target.
+          BASE: ${{ vars.GIMMS_LIVE_BASE || 'https://ai-gimms-hub.vercel.app' }}
         run: bash scripts/verify-live.sh 2>&1 | tee verification-results.txt
-      - name: Publish results to the branch
+
+      - name: Upload real evidence
         if: always()
-        run: |
-          git config user.name "arena-verify"
-          git config user.email "arena-verify@users.noreply.github.com"
-          git add -f verification-results.txt
-          git diff --cached --quiet || git commit -m "Record live verification results"
-          git push origin HEAD:arena/92b892eb-ceylongimmsai
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-verification
+          path: verification-results.txt
+          if-no-files-found: warn
