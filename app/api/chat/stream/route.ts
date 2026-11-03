@@ -11,7 +11,7 @@ export const runtime = "nodejs";
  * No fabricated heartbeat "results", no simulated AI activity.
  */
 export async function GET(request: Request) {
-  const auth = requireOwner(request);
+  const auth = await requireOwner(request);
   if (!auth.ok) {
     return NextResponse.json(
       { ok: false, error: auth.error },

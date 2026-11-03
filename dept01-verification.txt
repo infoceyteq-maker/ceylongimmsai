@@ -1,5 +1,5 @@
-DEPT01_BASE=http://localhost:3000
-DEPT01_STAMP=20261103T151852Z
+DEPT01_BASE=http://localhost:3010
+DEPT01_STAMP=20261103T161222Z
 SCOPE=local credential-free P1-01 implementation; no deploy, no credentials, no payments
 
 --- 15 pages (14 existing + /departments/01) ---
@@ -34,121 +34,121 @@ PASS | exactly 80 new P1-01 skills declared behind the same gateway | newSkills=
 PASS | requiresExternal stays 0
 
 --- execute EVERY declared skill with a generic payload (real work, evidence hashes) ---
-skill_harness_job_id=job_mw0u24z428ulnj
-skill account.owner.propose ok=true sha=f6095bb7cad1f775
-skill admin.approval.workflow ok=true sha=9a9e34941ab38c28
-skill admin.asset.register ok=true sha=a1e5b68b67a333bf
-skill admin.branch.register ok=true sha=9ad85921a35413d9
-skill admin.communication.draft ok=true sha=b2b251df8b772ac6
-skill admin.contract.register ok=true sha=29424037c3d5a091
-skill admin.document.register ok=true sha=25e29f106a36a06b
-skill admin.legal.coordinate ok=true sha=9a839456c0bf68e5
-skill admin.letter.draft ok=true sha=05374555c9dcc3d2
-skill admin.meeting.schedule ok=true sha=f382f663257abec8
-skill admin.office.record ok=true sha=dc56498ec5a1deac
-skill admin.policy.register ok=true sha=542bc98be554e334
-skill admin.task.create ok=true sha=ad722d652805bcaf
-skill admin.template.register ok=true sha=2bc38fb9a6658f81
+skill_harness_job_id=job_mw0vyy5lt9fw7u
+skill account.owner.propose ok=true sha=97f6e2002f37312a
+skill admin.approval.workflow ok=true sha=b131807d6807bded
+skill admin.asset.register ok=true sha=bc3fe8fcf8ce1f81
+skill admin.branch.register ok=true sha=d3e377bef8687871
+skill admin.communication.draft ok=true sha=9645b84b99c21440
+skill admin.contract.register ok=true sha=7c4f964c8a7111f4
+skill admin.document.register ok=true sha=360fee82d4a428c0
+skill admin.legal.coordinate ok=true sha=6fe607f728616821
+skill admin.letter.draft ok=true sha=e64f12cd327b72d0
+skill admin.meeting.schedule ok=true sha=51ced77815d44b6b
+skill admin.office.record ok=true sha=3702b94d84941590
+skill admin.policy.register ok=true sha=28fcd0d6a41eb89d
+skill admin.task.create ok=true sha=97500b970679d871
+skill admin.template.register ok=true sha=4abe5c955720fbda
 skill agent.roster.configure ok=true sha=d56569247749222a
 skill audience.segment ok=true sha=0be65d2918a665b7
-skill campaign.plan ok=true sha=fb344e484f92f3b3
-skill client.record ok=true sha=61f3a598432d461d
-skill code.scaffold ok=true sha=e0a5838b76bf292e
-skill content.draft ok=true sha=628f9b5391647896
+skill campaign.plan ok=true sha=db0da40449343bcc
+skill client.record ok=true sha=b12600584d77b7b5
+skill code.scaffold ok=true sha=daec7b79f69fa0d7
+skill content.draft ok=true sha=ad7b1e6a9991a579
 skill delivery.checklist ok=true sha=47d25b4e1cdc2a62
 skill department.registry ok=true sha=d14ed9bd4387a160
 skill dependency.check ok=true sha=5283b25902ce72cb
-skill design.brief ok=true sha=8370d684437cbc6a
-skill doc.agreement.draft ok=true sha=3295a32a8eade968
-skill doc.email.draft ok=true sha=2c19d601832b880b
-skill doc.file.organize ok=true sha=f2d4ee6c6b7c8bf4
-skill doc.financial.report ok=true sha=aa82db361d259ccb
-skill doc.format ok=true sha=b5af54b12093f477
-skill doc.hr.report ok=true sha=9b5cd2891c06e2a2
-skill doc.letter.draft ok=true sha=244b9aa8c560cb43
-skill doc.minutes.draft ok=true sha=ba0331bb091ef68d
-skill doc.proposal.draft ok=true sha=cb990611af8f5f77
-skill doc.template ok=true sha=628962e739881869
-skill document.register ok=true sha=af8e2bf6bd69a88c
-skill env.hygiene ok=true sha=723a88c6537710d0
+skill design.brief ok=true sha=09e3db210f250816
+skill doc.agreement.draft ok=true sha=0aeda1441fc23fb1
+skill doc.email.draft ok=true sha=582c2f2b2689b15a
+skill doc.file.organize ok=true sha=7c56816f90416574
+skill doc.financial.report ok=true sha=39c4a1a71e6a3965
+skill doc.format ok=true sha=9e9836d69081fbd8
+skill doc.hr.report ok=true sha=347e9fc519e73b29
+skill doc.letter.draft ok=true sha=347b65b017a1a256
+skill doc.minutes.draft ok=true sha=3faa077f18c21789
+skill doc.proposal.draft ok=true sha=c4cf43d541c4ce86
+skill doc.template ok=true sha=ec5440f51dd459ac
+skill document.register ok=true sha=859a1b8d5fc05b03
+skill env.hygiene ok=true sha=79f88e2293de1535
 skill error.report ok=true sha=16007e2f9da992f1
-skill expense.draft ok=true sha=b6f1a2291f17b13b
-skill finance.ar.aging ok=true sha=7ceb4ca2b51a65c9
-skill finance.budget.create ok=true sha=e53ba874207eebe0
+skill expense.draft ok=true sha=58fc7165969b680f
+skill finance.ar.aging ok=true sha=1bcd68abcf2b0f79
+skill finance.budget.create ok=true sha=ef2b7e0c7f6a51e8
 skill finance.budget.variance ok=true sha=ba0cb993f7a9636c
 skill finance.cashflow.statement ok=true sha=3d4bbac09d5f333a
-skill finance.document.generate ok=true sha=4e0baaf68955b196
-skill finance.expense.record ok=true sha=ccc4c0b2528f36a9
-skill finance.income.record ok=true sha=6868dbba9bcf0c80
-skill finance.invoice.draft ok=true sha=35ff5de3cdcc6816
-skill finance.payable.register ok=true sha=cbf1e7595ff20f27
-skill finance.payment.request ok=true sha=3f3334c469949911
+skill finance.document.generate ok=true sha=bc0b92b97778da33
+skill finance.expense.record ok=true sha=37105a78bbcf89b1
+skill finance.income.record ok=true sha=2365fef005eb8205
+skill finance.invoice.draft ok=true sha=d1192da047172842
+skill finance.payable.register ok=true sha=bb8e0394d3117d57
+skill finance.payment.request ok=true sha=b8f36dba344f0148
 skill finance.pl.statement ok=true sha=5f40cad10195f225
-skill finance.quotation.draft ok=true sha=c509a4da454a25eb
-skill finance.receivable.register ok=true sha=bcbc260157ffc6c5
-skill finance.reminder.draft ok=true sha=5b0174c4f2a7264e
-skill finance.report.generate ok=true sha=0c5138b4fad5f645
+skill finance.quotation.draft ok=true sha=7b75134821a965c0
+skill finance.receivable.register ok=true sha=55d78e930c337235
+skill finance.reminder.draft ok=true sha=924fea87fa55c5bf
+skill finance.report.generate ok=true sha=02d4f6c1678733c7
 skill finance.tax.support ok=true sha=35198f24aa449e62
-skill hr.application.screen ok=true sha=56e16b3debde8931
-skill hr.attendance.record ok=true sha=fb01e1603fdfd583
-skill hr.contract.draft ok=true sha=e50fa674af09dcab
-skill hr.document.register ok=true sha=5b43c1f53c98654a
+skill hr.application.screen ok=true sha=336d6cc1243dee30
+skill hr.attendance.record ok=true sha=3224ae4d9207646b
+skill hr.contract.draft ok=true sha=37425e4088f884f8
+skill hr.document.register ok=true sha=ca250d4572658b59
 skill hr.employee.id ok=true sha=c2b381f86bc6f0ff
-skill hr.employee.register ok=true sha=5f2bb6ac981488ca
-skill hr.interview.schedule ok=true sha=57abf1944ab05733
-skill hr.leave.record ok=true sha=7180eff513f582c9
-skill hr.offboarding.plan ok=true sha=a559b5ffa6c9e8ca
-skill hr.onboarding.plan ok=true sha=1f606cf66439cd1b
-skill hr.payroll.calculate ok=true sha=dcb232136867137f
-skill hr.performance.review ok=true sha=6c2505a22485f12c
-skill hr.recruitment.vacancy ok=true sha=c4f7039a4873399e
-skill hr.report.generate ok=true sha=04e6230aef4efea4
+skill hr.employee.register ok=true sha=942fb49c66077909
+skill hr.interview.schedule ok=true sha=e2a2591ebfede6a7
+skill hr.leave.record ok=true sha=a72cac67b5253ee9
+skill hr.offboarding.plan ok=true sha=dcca6782edfd073e
+skill hr.onboarding.plan ok=true sha=08eed8a02029338f
+skill hr.payroll.calculate ok=true sha=8f35d9a4aa7a6729
+skill hr.performance.review ok=true sha=c75af3fbfa4bb045
+skill hr.recruitment.vacancy ok=true sha=d75736806d61cb97
+skill hr.report.generate ok=true sha=a0c7ea7915896a35
 skill hr.roles.permissions ok=true sha=5dba7d411dc0ddd4
-skill hr.training.record ok=true sha=96cd6cae6fbc9ad6
+skill hr.training.record ok=true sha=a86c41700b12b71e
 skill integration.inventory ok=true sha=99fa1f7ec93ee052
-skill integration.request.list ok=true sha=7964b0049d469128
-skill invoice.draft ok=true sha=a0d98d63aa613634
-skill job.intake ok=true sha=b615797b8a262901
+skill integration.request.list ok=true sha=7853a77c255275dd
+skill invoice.draft ok=true sha=74da735e61d12b16
+skill job.intake ok=true sha=6605a16565cc54f3
 skill job.route ok=true sha=63b1fb83d8e481b5
 skill knowledge.index ok=true sha=f9b8bea460e63af3
-skill lead.capture ok=true sha=19d172f0f9d063b8
-skill lead.record ok=true sha=47683d356bf1fb38
-skill office.excel.create ok=true sha=8b3999eea51bebd1
-skill office.google.calendar.draft ok=true sha=db513d002a7ec30f
-skill office.google.docs.draft ok=true sha=c1493c5f71d61cdd
-skill office.google.drive.draft ok=true sha=4d58029d187fda28
-skill office.google.gmail.draft ok=true sha=09c2fded71e3875d
-skill office.google.sheets.draft ok=true sha=7c8648836547fbb2
-skill office.google.slides.draft ok=true sha=aa257511df9a27ea
-skill office.outlook.calendar.draft ok=true sha=af99b2a1e890cb4e
-skill office.outlook.email.draft ok=true sha=d48e768dc3ebed0b
-skill office.powerpoint.create ok=true sha=47f6d971d73ff34c
-skill office.word.create ok=true sha=5ddd8f2f1eac78b0
-skill office.word.edit ok=true sha=d8b4b2bdc14c378f
-skill order.record ok=true sha=46be8061eb8b87d0
-skill owner.command.execute ok=true sha=ef31ee5ff91544b5
-skill owner.dashboard ok=true sha=83b8728617cc9cfc
-skill pdf.convert ok=true sha=3ae8e570f049046d
-skill pdf.create ok=true sha=f968327ec9d298da
-skill pdf.edit ok=true sha=1c4c38e6d6d7ccaa
-skill pdf.form.fill ok=true sha=1b9be822defb9dcb
-skill pdf.merge ok=true sha=6d1a8ea545062072
-skill pdf.split ok=true sha=b00516e8fbcb86bc
-skill pdf.summarize ok=true sha=aa721d56d2f8f99b
-skill pdf.text.extract ok=true sha=eccda9a3b65a1d0c
-skill progress.report ok=true sha=00415dbc32fb0e1f
-skill proposal.draft ok=true sha=d17eca38dd0adc55
-skill qa.check ok=true sha=9821f26a8a2767e9
-skill quotation.draft ok=true sha=972143e4f110ba5f
-skill report.version ok=true sha=f73aa2a13467d31e
-skill research.report ok=true sha=df1f05462f256ef8
+skill lead.capture ok=true sha=c7a5fd915da60b13
+skill lead.record ok=true sha=9cc7a55abe7f02a2
+skill office.excel.create ok=true sha=6d3bc2edcb3d75b2
+skill office.google.calendar.draft ok=true sha=1326ed512292380a
+skill office.google.docs.draft ok=true sha=01d9194b9a397608
+skill office.google.drive.draft ok=true sha=17bc893f06191e18
+skill office.google.gmail.draft ok=true sha=ce8898345dd96ec9
+skill office.google.sheets.draft ok=true sha=abd2dc300d392922
+skill office.google.slides.draft ok=true sha=9dccbf93ab757712
+skill office.outlook.calendar.draft ok=true sha=96b400fad0425f98
+skill office.outlook.email.draft ok=true sha=cc4ee50910effc04
+skill office.powerpoint.create ok=true sha=8a75b703cf50a009
+skill office.word.create ok=true sha=9cf168428730b4b5
+skill office.word.edit ok=true sha=f5927dfeab642898
+skill order.record ok=true sha=e6b347f6d6b244a9
+skill owner.command.execute ok=true sha=0e75ac904c716dc6
+skill owner.dashboard ok=true sha=91d4b18b86fa4640
+skill pdf.convert ok=true sha=16138a121d143fb2
+skill pdf.create ok=true sha=653fa7e4137b8aea
+skill pdf.edit ok=true sha=264017271622d863
+skill pdf.form.fill ok=true sha=c685d017441384aa
+skill pdf.merge ok=true sha=fd931883de0b66f3
+skill pdf.split ok=true sha=18e88d126386eb03
+skill pdf.summarize ok=true sha=0cd55673a6cbd9eb
+skill pdf.text.extract ok=true sha=44740dd565217ccb
+skill progress.report ok=true sha=e5cd759e2434809f
+skill proposal.draft ok=true sha=f64137587af079c7
+skill qa.check ok=true sha=6191a958aa04818b
+skill quotation.draft ok=true sha=c1e5a9666fccc321
+skill report.version ok=true sha=f78b64149541e532
+skill research.report ok=true sha=b50065c4724def1e
 skill seo.audit.local ok=true sha=115702da9b4e9c80
 skill source.verify ok=true sha=9077786236b8a5e9
-skill status.transition ok=true sha=e61fca944cc9a8a0
-skill supplier.record ok=true sha=2f528823c20ccbb0
-skill support.ticket ok=true sha=0e58430136b16e3b
-skill system.audit ok=true sha=b21ad1ddf28fa7da
-skill workflow.hr.to.production ok=true sha=a79dcfc3202705f6
+skill status.transition ok=true sha=86ed78aa7ce7e0a6
+skill supplier.record ok=true sha=2471042de000444e
+skill support.ticket ok=true sha=4e4c7e7ebecbc7a5
+skill system.audit ok=true sha=c86c59629566ef27
+skill workflow.hr.to.production ok=true sha=b81fb2532b057073
 skill_executed_ok=114
 skill_failed=0
 PASS | every declared skill executed successfully | ok=114 failed=0
@@ -168,7 +168,7 @@ PASS | no payment / no invented statutory rates
 PASS | HR report counts real local records | records=399
 
 --- Finance: real records, reports and authorisation guards ---
-expense_approval={"required":true,"id":"approval_mw0u26y49uvq2t","artifactVersion":"113ebd9952656d8ffd009c28d1ca437b2fd914dd93abeee52add8b7e2c17a79b","status":"APPROVED_RECORD_ONLY","decidedBy":"OWNER_COMMAND (explicit local command text)","recordOnly":true}
+expense_approval={"required":true,"id":"approval_mw0vz0jmdq4049","artifactVersion":"daf584715d2473758fd2ec93be8bc859ed3b9f905bd10f21623479c4640c7bb6","status":"APPROVED_RECORD_ONLY","decidedBy":"OWNER_COMMAND (explicit local command text)","recordOnly":true}
 PASS | expense approval is explicit + versioned + RECORD ONLY
 PASS | expense did not move money or post to accounting
 pl revenue=1000000 costs=375000 profitOrLoss=625000
@@ -185,7 +185,7 @@ payment.execute -> HTTP 403 ok=false
 PASS | payment.execute is refused with HTTP 403
 
 --- versioned approval workflow ---
-approval_id=approval_mw0u272wvtki35 status=PENDING
+approval_id=approval_mw0vz0qiu0dbcw status=PENDING
 PASS | approval starts PENDING, never auto-approved
 PASS | wrong artifactVersion is rejected | artifactVersion mismatch — approval covers an exact version only
 PASS | missing approver is rejected
@@ -240,7 +240,7 @@ PASS | workflow jobs persist after reload | count=9
 --- EXACT Owner sample command (real execution, not a chatbot reply) ---
 COMMAND=GIMMS, create a new employee record, prepare an employment agreement in Word and PDF, create a payroll sheet in Excel, register an approved office expense, and assign a website development job to Production through Management.
 ok=true parsedSteps=["hr.employee.register","doc.agreement.draft","office.excel.create","finance.expense.record","workflow.hr.to.production"] steps=5 succeeded=5 aiModelUsed=false
-sha256=70eb92273e55fca8ab8a154839f80e445e5f31cb8ac19c17f4c58fe8dc0ae159
+sha256=f73a98200abf0bede0d7d7f91131384ff62f05dfa0177a7b56370b7a233c7919
 step hr.employee.register ok=true artifacts=0
 step doc.agreement.draft ok=true artifacts=2
 step office.excel.create ok=true artifacts=1
@@ -254,11 +254,11 @@ PASS | agreement produced real .docx + .pdf
 PASS | payroll sheet produced real .xlsx
 PASS | expense registered with versioned approval
 PASS | website job handed to Management then Production
-command_artifacts=doc-agreement-draft-mw0u27op-a4ca8f.docx:docx:4331B | doc-agreement-draft-mw0u27ox-0cb6b3.pdf:pdf:2019B | office-excel-create-mw0u27ph-60961b.xlsx:xlsx:4182B
+command_artifacts=doc-agreement-draft-mw0vz1fp-78e0ec.docx:docx:4331B | doc-agreement-draft-mw0vz1fx-89fa4b.pdf:pdf:2019B | office-excel-create-mw0vz1gk-e227ff.xlsx:xlsx:4182B
 PASS | Owner command produced 3 downloadable files (.docx + .pdf + .xlsx) | count=3
-artifact_verify doc-agreement-draft-mw0u27op-a4ca8f.docx http=200 bytes=4331 sha256_match=true
-artifact_verify doc-agreement-draft-mw0u27ox-0cb6b3.pdf http=200 bytes=2019 sha256_match=true
-artifact_verify office-excel-create-mw0u27ph-60961b.xlsx http=200 bytes=4182 sha256_match=true
+artifact_verify doc-agreement-draft-mw0vz1fp-78e0ec.docx http=200 bytes=4331 sha256_match=true
+artifact_verify doc-agreement-draft-mw0vz1fx-89fa4b.pdf http=200 bytes=2019 sha256_match=true
+artifact_verify office-excel-create-mw0vz1gk-e227ff.xlsx http=200 bytes=4182 sha256_match=true
 PASS | every command artifact matches its recorded byte count and SHA-256 | verified=3
 PASS | command agreement .docx contains the real DRAFT clauses
 PASS | command agreement .pdf is a real PDF with xref
@@ -277,20 +277,20 @@ PASS | no .env.local committed/present
 PASS | no AI SDK / new npm dependency added
 
 --- Phase 0 regression (full harness with 114 skills) ---
-P0 PHASE0_BASE=http://localhost:3000
-P0 PHASE0_STAMP=20261103T151856Z
+P0 PHASE0_BASE=http://localhost:3010
+P0 PHASE0_STAMP=20261103T161228Z
 P0 "summary":{"total":10,"active":7,"deferred":3,"priorityOrder":["01","02","04","03","05","09","10"],"deferredIds":["06","07","08"],"divisions":69,"roles":156}
 P0 active_p0_count 7
 P0 deferred_count 3
 P0 "summary":{"total":114,"checkSkills":35,"draftSkills":79,"requiresExternal":0,"byDepartment":[{"id":"01","name":"HR, Finance & Administration","skills":["invoice.draft","expense.draft","document.register","hr.employee.register","hr.recruitment.vacancy","hr.application.screen","hr.interview.schedule","hr.onboarding.plan","hr.offboarding.plan","hr.employee.id","hr.attendance.record","hr.leave.record","hr.payroll.calculate","hr.performance.review","hr.training.record","hr.contract.draft","hr.roles.permissions","hr.document.register","hr.report.generate","finance.income.record","finance.expense.record","finance.budget.create","finance.budget.variance","finance.receivable.register","finance.ar.aging","finance.payable.register","finance.invoice.draft","finance.quotation.draft","finance.payment.request","finance.report.generate","finance.cashflow.statement","finance.pl.statement","finance.reminder.draft","finance.document.generate","finance.tax.support","admin.office.record","admin.document.register","admin.communication.draft","admin.meeting.schedule","admin.task.create","admin.asset.register","admin.branch.register","admin.policy.register","admin.legal.coordinate","admin.contract.register","admin.letter.draft","admin.template.register","admin.approval.workflow","office.word.create","office.word.edit","office.excel.create","office.powerpoint.create","office.outlook.email.draft","office.outlook.calendar.draft","office.google.docs.draft","office.google.sheets.draft","office.google.slides.draft","office.google.drive.draft","office.google.gmail.draft","office.google.calendar.draft","pdf.create","pdf.edit","pdf.convert","pdf.merge","pdf.split","pdf.form.fill","pdf.text.extract","pdf.summarize","doc.letter.draft","doc.proposal.draft","doc.agreement.draft","doc.hr.report","doc.financial.report","doc.minutes.draft","doc.email.draft","doc.format","doc.template","doc.file.organize","agent.roster.configure","account.owner.propose","workflow.hr.to.production","owner.command.execute","integration.request.list"]}
-P0 skill_harness_job_id=job_mw0u28gmzxxeck
+P0 skill_harness_job_id=job_mw0vz2hf4qam2n
 P0 skill_executed_ok=114
 P0 skill_failed=0
-P0 created_job_id=job_mw0u2bbylufhcj
+P0 created_job_id=job_mw0vz5uklkm14p
 P0 job_present_after_reload 1
-P0 "summary":{"total":76,"byStatus":{"NEW":12,"REVIEW":45,"APPROVAL":19}
+P0 "summary":{"total":74,"byStatus":{"NEW":12,"REVIEW":45,"APPROVAL":17}
 P0 "connected":0
-P0 PHASE0_VERIFICATION_DONE=20261103T151856Z
+P0 PHASE0_VERIFICATION_DONE=20261103T161228Z
 PASS | Phase 0 harness: 0 skill failures | skill_failed=0
 PASS | Phase 0 harness: registry still 10/7/3
 PASS | Phase 0 harness: job persists after reload
@@ -298,5 +298,5 @@ PASS | Phase 0 harness: connected stays 0
 
 DEPT01_TESTS_PASS=88
 DEPT01_TESTS_FAIL=0
-DEPT01_VERIFICATION_DONE=20261103T151852Z
+DEPT01_VERIFICATION_DONE=20261103T161222Z
 HONESTY=LOCAL TESTS ONLY. No deploy, no external integration, no payment, no production change, no 100% completion claim.

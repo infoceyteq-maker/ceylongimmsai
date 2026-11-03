@@ -28,8 +28,8 @@ export const runtime = "nodejs";
 
 const NO_STORE = { "Cache-Control": "no-store, max-age=0", "X-Robots-Tag": "noindex, nofollow" };
 
-function requireOwnerJson(request: Request) {
-  const auth = requireOwner(request);
+async function requireOwnerJson(request: Request) {
+  const auth = await requireOwner(request);
   if (!auth.ok) {
     return { ok: false as const, response: NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE }) };
   }
@@ -37,7 +37,7 @@ function requireOwnerJson(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const auth = requireOwnerJson(request);
+  const auth = await requireOwnerJson(request);
   if (!auth.ok) return auth.response;
 
   const url = new URL(request.url);
@@ -84,7 +84,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = requireOwnerJson(request);
+  const auth = await requireOwnerJson(request);
   if (!auth.ok) return auth.response;
 
   const guard = guardMutation(request);

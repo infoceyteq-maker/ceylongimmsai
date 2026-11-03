@@ -46,6 +46,7 @@ import { auditEntry } from "@/lib/store";
 import { hash } from "@/lib/jobs";
 import { ownerCookieName, OWNER_COOKIE_NAMES } from "@/lib/cookie-names";
 import { hasVar, isVercel, isProduction } from "@/lib/env";
+import { ownerStoreDriver, readOwnerRecord, writeOwnerRecord } from "@/lib/owner-store";
 
 const FILE = path.join(/*turbopackIgnore: true*/ process.cwd(), "data", "gimms-owner.json");
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
@@ -124,7 +125,7 @@ function empty(): OwnerFile {
   };
 }
 
-function read(): OwnerFile {
+function fileRead(): OwnerFile {
   try {
     const parsed = JSON.parse(fs.readFileSync(FILE, "utf8")) as OwnerFile;
     if (parsed && parsed.version === 1 && Array.isArray(parsed.sessions)) return parsed;
@@ -134,7 +135,7 @@ function read(): OwnerFile {
   return empty();
 }
 
-function write(data: OwnerFile): boolean {
+function fileWrite(data: OwnerFile): boolean {
   data.sha256 = hash({
     registered: data.registered,
     profile: data.profile,
@@ -154,13 +155,55 @@ function write(data: OwnerFile): boolean {
   }
 }
 
+
+/**
+ * ── THE SEAM ────────────────────────────────────────────────────────────────
+ * `read()` / `write()` are the only two functions that touch storage. They dispatch to
+ * Supabase when it is configured (durable across cold starts) and to the JSON file
+ * otherwise (unchanged local behaviour).
+ *
+ * They are `async` because a remote row cannot be read synchronously without a
+ * dependency such as `deasync`, which this repo refuses to add. Every caller therefore
+ * awaits them; `requireOwner()` and friends are async for the same reason.
+ *
+ * FAIL-CLOSED: on the Supabase driver an unreadable row means "not registered" → 401.
+ * It never falls back to the file, because silently switching identity stores is a
+ * security bug, not a convenience.
+ */
+async function read(): Promise<OwnerFile> {
+  if (ownerStoreDriver() === "file") return fileRead();
+
+  const { record, error } = await readOwnerRecord();
+  if (error) return empty();
+  const parsed = record as OwnerFile | null;
+  if (parsed && parsed.version === 1 && Array.isArray(parsed.sessions)) return parsed;
+  return empty();
+}
+
+async function write(data: OwnerFile): Promise<boolean> {
+  data.sha256 = hash({
+    registered: data.registered,
+    profile: data.profile,
+    sessions: data.sessions,
+    failedAttempts: data.failedAttempts,
+    auditTrail: data.auditTrail,
+  });
+
+  if (ownerStoreDriver() === "file") return fileWrite(data);
+
+  const { persisted } = await writeOwnerRecord(data);
+  return persisted;
+}
+
 /**
  * True when the runtime filesystem can be trusted to persist the Owner record.
  * On Vercel serverless: the project directory is read-only and /tmp is per-instance
  * and wiped on cold start, so a JSON file can never be the durable identity store.
  */
 export function ownerStoreIsDurable(): boolean {
-  return !isVercel;
+  // Supabase-backed → durable everywhere. File-backed → durable only off Vercel,
+  // which is exactly the old behaviour for local development and CI.
+  return ownerStoreDriver() === "supabase" || !isVercel;
 }
 
 
@@ -192,11 +235,11 @@ export const SECURITY_BOUNDARIES = [
   "Registration closed once registered; first-run claim requires OWNER_BOOTSTRAP_TOKEN in production",
   "No real Owner identity invented: email null, realDetailsStored false",
   "No email sent, no personal account connected, no external API call, no deploy",
-  "ON VERCEL THE FILE STORE IS EPHEMERAL — durable identity requires a Supabase-backed store (open item)",
+  "Durable identity: Supabase row gimms_owner_state(id=owner) when SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY are set; otherwise the local JSON file (not durable on Vercel)",
 ] as const;
 
-export function ownerStatus() {
-  const data = read();
+export async function ownerStatus() {
+  const data = await read();
   return {
     registered: data.registered,
     durable: ownerStoreIsDurable(),
@@ -225,13 +268,13 @@ export function ownerStatus() {
  * Can a registration request proceed? See the module header for the three
  * permitted paths. Returns a reason string when refused.
  */
-export function registrationGate(request: Request): { ok: boolean; reason?: string; via?: string } {
-  const data = read();
+export async function registrationGate(request: Request): Promise<{ ok: boolean; reason?: string; via?: string }> {
+  const data = await read();
   if (data.registered) {
     return { ok: false, reason: "Owner account already registered. Registration is closed; use login or change-password." };
   }
 
-  const existingSession = verifySession(sessionFromRequest(request));
+  const existingSession = await verifySession(sessionFromRequest(request));
   if (existingSession) return { ok: true, via: "existing-owner-session" };
 
   const provided = request.headers.get("x-gimms-bootstrap-token")?.trim() || "";
@@ -268,18 +311,18 @@ function timingSafeStringEqual(a: string, b: string): boolean {
   return crypto.timingSafeEqual(left, right);
 }
 
-export function registerOwner(input: { password?: unknown; displayName?: unknown }): {
+export async function registerOwner(input: { password?: unknown; displayName?: unknown }): Promise<{
   ok: boolean;
   error?: string;
   profile?: OwnerProfile;
   sessionToken?: string;
   persisted?: boolean;
-} {
+}> {
   const password = typeof input.password === "string" ? input.password : "";
   if (password.length < 12 || password.length > 256) {
     return { ok: false, error: "password must be 12–256 characters (chosen by the Owner in the UI, never sent in chat)" };
   }
-  const data = read();
+  const data = await read();
   if (data.registered) {
     return { ok: false, error: "Owner account already registered. Use the login form or change-password action." };
   }
@@ -316,17 +359,17 @@ export function registerOwner(input: { password?: unknown; displayName?: unknown
   data.failedAttempts = 0;
   data.lockUntil = null;
   audit(data, "owner.registered", `${profile.employeeId} local Founder/Super Admin created`);
-  const persisted = write(data);
+  const persisted = await write(data);
   return { ok: true, profile, sessionToken: token, persisted };
 }
 
-export function loginOwner(password: unknown): {
+export async function loginOwner(password: unknown): Promise<{
   ok: boolean;
   error?: string;
   profile?: OwnerProfile;
   sessionToken?: string;
-} {
-  const data = read();
+}> {
+  const data = await read();
   if (!data.registered || !data.passwordHash || !data.passwordSalt) {
     return { ok: false, error: "Owner account is not registered yet" };
   }
@@ -339,7 +382,7 @@ export function loginOwner(password: unknown): {
     data.failedAttempts += 1;
     if (data.failedAttempts >= MAX_FAILED) data.lockUntil = new Date(Date.now() + LOCK_MS).toISOString();
     audit(data, "owner.login.failed", `attempt ${data.failedAttempts}`);
-    write(data);
+    await write(data);
     return { ok: false, error: "Invalid password" };
   }
 
@@ -351,12 +394,12 @@ export function loginOwner(password: unknown): {
   data.failedAttempts = 0;
   data.lockUntil = null;
   audit(data, "owner.login.success", "session created");
-  write(data);
+  await write(data);
   return { ok: true, profile: data.profile ?? undefined, sessionToken: token };
 }
 
-export function changeOwnerPassword(current: unknown, next: unknown): { ok: boolean; error?: string } {
-  const data = read();
+export async function changeOwnerPassword(current: unknown, next: unknown): Promise<{ ok: boolean; error?: string }> {
+  const data = await read();
   if (!data.registered || !data.passwordHash || !data.passwordSalt) return { ok: false, error: "not registered" };
   const currentPassword = typeof current === "string" ? current : "";
   if (!safeEqual(derive(currentPassword, data.passwordSalt), data.passwordHash)) return { ok: false, error: "Invalid current password" };
@@ -367,13 +410,13 @@ export function changeOwnerPassword(current: unknown, next: unknown): { ok: bool
   data.passwordHash = derive(nextPassword, salt);
   data.sessions = [];
   audit(data, "owner.password.changed", "all sessions invalidated");
-  write(data);
+  await write(data);
   return { ok: true };
 }
 
-export function verifySession(token: string | null | undefined): OwnerProfile | null {
+export async function verifySession(token: string | null | undefined): Promise<OwnerProfile | null> {
   if (!token) return null;
-  const data = read();
+  const data = await read();
   if (!data.registered || !data.profile) return null;
   const digest = tokenHash(token);
   const session = data.sessions.find((item) => item.tokenHash === digest);
@@ -428,21 +471,21 @@ export function ownerSessionCookie(token: string): {
   };
 }
 
-export function requireOwner(request: Request): { ok: true; profile: OwnerProfile } | { ok: false; error: string; status: number } {
-  const profile = verifySession(sessionFromRequest(request));
+export async function requireOwner(request: Request): Promise<{ ok: true; profile: OwnerProfile } | { ok: false; error: string; status: number }> {
+  const profile = await verifySession(sessionFromRequest(request));
   if (!profile) {
     return { ok: false, error: "Owner login required. Register and log in before issuing commands.", status: 401 };
   }
   return { ok: true, profile };
 }
 
-export function logoutOwner(token: string | null): { ok: boolean } {
+export async function logoutOwner(token: string | null): Promise<{ ok: boolean }> {
   if (!token) return { ok: true };
-  const data = read();
+  const data = await read();
   const digest = tokenHash(token);
   const before = data.sessions.length;
   data.sessions = data.sessions.filter((session) => session.tokenHash !== digest);
   audit(data, "owner.logout", "session removed");
-  write(data);
+  await write(data);
   return { ok: data.sessions.length !== before || before === 0 };
 }
