@@ -1,0 +1,119 @@
+OWNER_CHAT_BASE=http://127.0.0.1:3000
+OWNER_CHAT_STAMP=20261103T002536Z
+SCOPE=Activation of EXISTING Production AI Development Team through one real-time Owner Chat
+PRECHECK_TSC_EXIT=0
+PRECHECK_BUILD_EXIT=0
+TEST_PASSWORD=generated locally at runtime; NEVER printed, NEVER stored in plaintext
+
+--- 1. Owner Registration (Founder / Super Admin) ---
+owner_initial registered=false loginState=UNREGISTERED authenticated=false
+PASS | starts UNREGISTERED and unauthenticated
+register http=201 employeeId=EMP-0001 role=Founder / Owner / Super Admin cookie=set
+PASS | Owner registration returns 201 with a real employee profile
+PASS | profile is Founder / Owner / Super Admin with permissions
+PASS | NO real Owner details invented
+PASS | password never stored in plaintext / scrypt + httpOnly session
+PASS | session cookie issued for subsequent requests
+PASS | second registration is refused (one Owner account)
+PASS | authenticated Owner status resolves
+PASS | logout removes the session
+PASS | wrong password is refused with 401
+login http=200 cookie=set
+PASS | real login succeeds with the Owner's own password
+PASS | chat is protected: unauthenticated GET → 401
+PASS | chat is protected: unauthenticated command → 401
+PASS | SSE stream is protected: unauthenticated → 401
+
+--- 2/6. Real-time Owner Chat → command → job → execution → tests → result ---
+flow=["OWNER COMMAND","GIMMS CHAT","TASK CREATION","AI DEVELOPER ASSIGNMENT","EXECUTION (LOCAL DETERMINISTIC)","TESTING","RESULT","OWNER REVIEW"] status=LOCALLY_OPERATIONAL_NO_AI_MODEL
+PASS | chat overview returns 8-stage execution flow
+PASS | flow marks AI developer assignment BLOCKED
+PASS | empty conversation at start
+command http=200 jobId=job_mvzy5e7a3ubm5b checks=11/11 failed=0
+routing=code_review selectedModel=model-chatgpt-openai-gpt basis=keyword:code_review
+blocked={"stage":"AI DEVELOPER ASSIGNMENT","reason":"No AI model is connected. 0 authenticated provider connections; official API access requires separate Owner approval.","connectedModels":0,"requiresOwnerApproval":true} result_sha256=508d76a3a81ac47e4e238471d36c5830d40557b7ba99ce0c9daff9069c293c65
+sse_http=200 sse_bytes=11315 event_lines=30
+PASS | REAL command returns 200 with a real jobId
+PASS | 8-stage flow executed with real job transitions
+PASS | 8 real local execution operations recorded
+PASS | real local testing assertions all pass
+PASS | result has a real SHA-256 and blocked AI stage
+PASS | AI DEVELOPER ASSIGNMENT is BLOCKED with 0 connected models
+PASS | routing plan is non-executable and reuses PR #7 router
+PASS | honesty: 0 model calls / 0 external calls / 0 emails / no deploy
+PASS | SSE stream returns 200 text/event-stream
+PASS | SSE emitted a real ready event
+PASS | SSE emitted REAL TASK_CREATED progress
+PASS | SSE emitted REAL blocked AI-assignment event (not simulated success)
+PASS | SSE emitted REAL test/result events
+PASS | SSE emitted REAL Owner-review-pending event
+PASS | SSE carries >= 10 real event frames | count=30
+sse_sample=event: ready id: 1 event: info id: 2 event: progress id: 3 event: progress id: 4 event: progress id: 5 event: progress id: 6 event: blocked id: 7
+
+--- 3. Conversation history, job tracking, errors, Owner review ---
+counts={"messages":2,"events":29,"reviews":0,"commands":1} jobStatus=APPROVAL audit=7 snapshot_sha=62849723ab6d6d1a
+PASS | conversation history persisted (owner + gimms messages)
+PASS | every message is labelled aiModelUsed:false
+PASS | real job tracked at APPROVAL with audit trail
+PASS | real progress events persisted | events=29
+PASS | 1 command record with real result hash
+PASS | snapshot hash is deterministic across reload
+PASS | empty command is rejected with real error
+PASS | unknown action is rejected (no accidental product generation)
+PASS | review of unknown job is rejected
+review http=200 id=review_mvzy5h5t97rur0 version=508d76a3a81ac47e
+PASS | REAL Owner review recorded with the versioned result
+PASS | review makes no money movement / no external calls
+PASS | review persisted; job stays at APPROVAL (no fake delivery)
+second_command http=200 commands=2 jobs=2
+PASS | second real command creates a second real job
+PASS | second command also blocks AI execution honestly
+
+--- 4. Centralized Skills & Tools Registry ---
+registry existingSkills=114 specs=29 groups=8 localTools=7 aiSdk=0
+PASS | registry exposes 114 existing executable local skills
+PASS | registry exposes 29 spec-only development skills (0 implemented)
+PASS | 8 essential skill groups prepared
+PASS | skill groups honestly split executable / partial / framework-only
+PASS | real local tools detected (not invented)
+PASS | no AI SDK installed / no new package / no .env.local
+PASS | registry reports 0 connected AI models
+
+--- 5. AI models, accounts, tools — honesty regression ---
+prod_ai_team modelsConnected=0 connects=0
+PASS | PR #7 AI team config UNCHANGED: 0 models connected
+PASS | /api/connect still connected:0
+PASS | no AI provider / MANUAL publishing
+PASS | existing skills gateway UNCHANGED at 114
+PASS | department registry UNCHANGED 10/7/3/69/156
+PASS | Dept 01 honesty state UNCHANGED
+PASS | package.json unchanged (3 deps / 4 devDeps)
+PASS | no .env.local secret file
+page / http=200
+page /chat http=200
+page /departments/01 http=200
+PASS | real Owner Chat page is served (HTTP 200)
+modified_tracked=M .gitignore,M components/HubShell.tsx
+PASS | only the 2 intentional tracked edits (.gitignore, HubShell nav) | M .gitignore,M components/HubShell.tsx
+
+--- 6. Phase 0 regression ---
+P0 active_p0_count 7
+P0 deferred_count 3
+P0 skill_executed_ok=114
+P0 skill_failed=0
+P0 "connected":0
+P0 PHASE0_VERIFICATION_DONE=20261103T002542Z
+PASS | Phase 0 harness: 0 skill failures | skill_failed=0
+PASS | Phase 0 harness: registry still 7 active / 3 deferred
+PASS | Phase 0 harness: connected stays 0
+
+--- 7. Local test-state cleanup (real Owner can now register) ---
+removedOwnerFile=true removedChatFile=true final_registered=false
+PASS | test Owner account removed → real Owner can register themselves
+PASS | test conversation removed (no simulated history left behind)
+PASS | no password value appears in this evidence file
+
+OWNER_CHAT_TESTS_PASS=69
+OWNER_CHAT_TESTS_FAIL=0
+OWNER_CHAT_VERIFICATION_DONE=20261103T002536Z
+HONESTY=Real commands/jobs/events/tests/results/reviews. 0 AI models connected, 0 model calls, 0 external API calls, 0 emails, 0 purchases, 0 deploys. AI developer execution BLOCKED, NOT simulated. NOT production-ready.

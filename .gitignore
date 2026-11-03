@@ -13,3 +13,6 @@ data/gimms-jobs.json
 # P1-01 local Dept 01 runtime state + generated documents (not source)
 data/gimms-dept01.json
 data/dept01-artifacts/
+# P3 Owner Chat local runtime state (credentials hash + conversation; NEVER commit)
+data/gimms-owner.json
+data/gimms-chat.json
