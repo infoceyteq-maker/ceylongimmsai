@@ -5,6 +5,7 @@
 **Request:** *"Connect everything needed to move forward … we now need to build a good Developer Team."*  
 **Raw evidence:** `developer-team-ci-verification.txt` (CI-safe harness), `owner-chat-verification.txt`, `prod-ai-team-verification.txt`, `dept01-verification.txt`, `phase0-verification.txt`  
 **Result:** **`DEV_TEAM_CI_TESTS_PASS=29`, `FAIL=0`** · `tsc` 0 · `next build` 0 errors / 0 warnings · 17 static pages · 14 API routes
+**REAL GitHub Actions CI:** run `41554424863` → **success** in 40s, **11/11 steps passed**, artifact `gimms-developer-team-verification` uploaded (1305 bytes). Verified via `gh api .../actions/runs/41554424863/jobs`. Full log/artifact ZIP could not be downloaded into this sandbox (blob host outside outbound allowlist) — step conclusions, not assumed text, are the evidence.
 
 ---
 
@@ -49,13 +50,13 @@
 | 1 | **GitHub repository (`gh` CLI)** | `CONNECTED` | `gh auth status` + `gh api` OK |
 | 2 | **GitHub REST API host** | `CONNECTED` | Real probe 200 |
 | 3 | **npm registry** | `CONNECTED` | Real probe 200 + `npm install` OK |
-| 4 | **GitHub Actions — Developer Team CI** | `CONFIGURED` | New `gimms-developer-team.yml`, `permissions: contents: read`, real harness dispatched |
+| 4 | **GitHub Actions — Developer Team CI** | `CONNECTED` | Real run `41554424863` success (40s, 11/11 steps), `permissions: contents: read`, artifact uploaded |
 | 5 | **Local toolchain** (node/npm/git/tsc/python3/unzip/gh) | `CONNECTED_LOCAL` | 7/7 real `--version` detection |
 | 6 | **GIMMS Development Agent** | `CONNECTED_LOCAL` | PR #7 + PR #8 harness (69/69) — deterministic, **not** an AI model |
 | 7 | **Single `/api/skills` gateway — 114 skills** | `CONNECTED_LOCAL` | P0 regression `skill_executed_ok=114`, `skill_failed=0` |
 | 8 | **Real-time Owner Chat + job model** | `CONNECTED_LOCAL` | PR #8 merged `29d0c47`, real jobs / SSE / 11 assertions / Owner review |
 
-**Totals:** `connected: 7` (3 external + 4 local), `configuredPendingRun: 1`, `blocked: 7`, **`aiModelsConnected: 0`**, `authenticatedTestsPassed: 7`, `credentialsConfigured: 0` for AI/workspace providers.
+**Totals:** `connected: 8` (4 external + 4 local), `configuredPendingRun: 0`, `blocked: 7`, **`aiModelsConnected: 0`**, `authenticatedTestsPassed: 8`, `credentialsConfigured: 0` for AI/workspace providers.
 
 ### අලුතින් එකතු කළ "connect" වැඩ
 
@@ -105,7 +106,7 @@
 
 **DONE & TESTED:** Real connection audit with network probes; GitHub/npm/local/toolchain/skills/Owner-Chat connections verified; Developer Team CI workflow + CI-safe harness (29/29); fail-closed activation layer + probes API; Owner-facing connections dashboard; `tsc`/`build` clean; all 3 pages 200.
 
-**BUILT BUT UNTESTED:** None claimed — every new surface was exercised locally. The GitHub Actions run itself is dispatched separately; its real result is reported in the handoff note, not assumed.
+**BUILT BUT UNTESTED:** None claimed — every new surface was exercised locally AND the CI workflow produced a real successful run `41554424863` (11/11 steps). The log/artifact ZIP itself is outside this sandbox's outbound allowlist, so step conclusions were verified through the GitHub API rather than read as text.
 
 **PARTIAL:** AI model config/routing exists (PR #7) but 0 connections; 29 development skills are spec-only; local dev auth only; GitHub App/OAuth optional future scope.
 

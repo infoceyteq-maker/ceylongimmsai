@@ -1,10 +1,10 @@
 DEV_TEAM_CI_BASE=http://127.0.0.1:3000
-DEV_TEAM_CI_STAMP=20261103T003755Z
+DEV_TEAM_CI_STAMP=20261103T004206Z
 SCOPE=Real Developer Team core verification (CI-safe, no git-status assertions)
 TEST_PASSWORD=generated locally; NEVER printed
 
 --- 1. Connection activation layer ---
-dev_team status=DEVELOPER TEAM CORE CONNECTED LOCALLY + CI CONFIGURED — AI MODELS AND WORKSPACE ACCOUNTS BLOCKED connected=7 blocked=7 aiModels=0
+dev_team status=DEVELOPER TEAM CORE CONNECTED (LOCAL + REAL GITHUB ACTIONS CI) — AI MODELS AND WORKSPACE ACCOUNTS BLOCKED connected=8 blocked=7 aiModels=0
 PASS | Developer Team endpoint returns 200
 PASS | real connections > 0 and AI models connected = 0
 PASS | 0 credential values / 0 emails / 0 purchases / 0 deploys
@@ -21,7 +21,7 @@ PASS | unapproved authenticated test is refused
 --- 2. Owner registration + real-time command ---
 PASS | Owner registers with a real local login
 PASS | no real Owner details invented
-command http=200 jobId=job_mvzyl98pf1cylw checks=11/11 sse_frames=30
+command http=200 jobId=job_mvzyqma0l6j8nv checks=11/11 sse_frames=30
 PASS | real command creates a real job
 PASS | 8 real local operations + 11/11 real assertions
 PASS | AI developer assignment BLOCKED, not simulated

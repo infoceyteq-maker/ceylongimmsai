@@ -132,8 +132,8 @@ export const DEVELOPER_CONNECTIONS: DevConnection[] = [
     name: "GitHub Actions — Developer Team CI",
     category: "Repository / CI",
     purpose: "Automated tsc / build / real verification harness on every PR",
-    status: "CONFIGURED_PENDING_RUN",
-    verifiedBy: "New workflow added in this task; historical `verify-live.yml` has 2 successful runs. A fresh run is dispatched to prove this workflow.",
+    status: "CONNECTED",
+    verifiedBy: "REAL GitHub Actions run 41554424863 on arena/407a881c-ceylongimmsai — conclusion success in 40s, 11/11 steps passed (checkout, Node 22, npm ci, tsc, next build, real verification harness, artifact upload). Local harness DEV_TEAM_CI_TESTS_PASS=29/FAIL=0. Verified via `gh api .../actions/runs/41554424863/jobs`.",
     credentialName: "GITHUB_TOKEN (Actions-provided, read-only)",
     credentialNote: "Automatically provided by GitHub Actions. No personal credential, no new secret.",
     scopes: ["contents: read"],
@@ -141,10 +141,10 @@ export const DEVELOPER_CONNECTIONS: DevConnection[] = [
     networkProbe: "REACHABLE",
     ownerApprovalRequired: false,
     approvalGates: NO_APPROVAL_GATES,
-    authenticatedTest: "NOT_PERFORMED",
-    activationAction: "Dispatch `gimms-developer-team.yml` and record the real run result",
+    authenticatedTest: "PASS",
+    activationAction: "Already active — re-runs on every push to main / working branch and on PRs",
     blockers: [],
-    note: "CI only — NOT a deploy. `permissions: contents: read`, no push-back, no production change.",
+    note: "CI only — NOT a deploy. `permissions: contents: read`, no push-back, no production change. Full log/artifact ZIP could not be downloaded into this sandbox (host outside the outbound allowlist); step conclusions were verified through the GitHub API.",
   },
   {
     id: "local-toolchain",
@@ -535,7 +535,7 @@ export function developerTeamReadiness() {
     dependencies = 0;
   }
   return {
-    status: "DEVELOPER TEAM CORE CONNECTED LOCALLY + CI CONFIGURED — AI MODELS AND WORKSPACE ACCOUNTS BLOCKED",
+    status: "DEVELOPER TEAM CORE CONNECTED (LOCAL + REAL GITHUB ACTIONS CI) — AI MODELS AND WORKSPACE ACCOUNTS BLOCKED",
     summary,
     dependencies,
     aiSdksInstalled: 0,
