@@ -4,6 +4,11 @@
 # No deploy, no external API, no purchase, no production data change.
 set -u
 BASE="${BASE:-http://127.0.0.1:3000}"
+
+# Phase 1: every mutating call must look like a same-origin browser request, because
+# the CSRF guard rejects POSTs with no Origin (browsers always send one).
+ORIGIN_BASE="${BASE}"
+SEC_HEADERS=(-H "Content-Type: application/json" -H "Origin: ${ORIGIN_BASE}" -H "Sec-Fetch-Site: same-origin")
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 
 echo "PHASE0_BASE=$BASE"
@@ -25,7 +30,7 @@ printf '%s' "$SKILLS_JSON" | grep -o '"summary":{[^}]*}'
 SKILL_IDS="$(printf '%s' "$SKILLS_JSON" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);console.log((j.skills||[]).map(x=>x.id).join(' '))})")"
 
 echo "--- create a real job for skills that need one ---"
-HARNESS="$(curl -s -X POST -H 'Content-Type: application/json' --data "{\"action\":\"create\",\"title\":\"Phase 0 skill harness $STAMP\",\"departmentId\":\"10\"}" "$BASE/api/jobs")"
+HARNESS="$(curl -s -X POST "${SEC_HEADERS[@]}" --data "{\"action\":\"create\",\"title\":\"Phase 0 skill harness $STAMP\",\"departmentId\":\"10\"}" "$BASE/api/jobs")"
 SKILL_JOB_ID="$(printf '%s' "$HARNESS" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);console.log(j.job?.jobId||'')})")"
 echo "skill_harness_job_id=$SKILL_JOB_ID"
 
@@ -33,7 +38,7 @@ echo "--- execute EVERY skill (real deterministic work, evidence hash) ---"
 SKILL_OK=0
 SKILL_FAIL=0
 for id in $SKILL_IDS; do
-  RES="$(curl -s -X POST -H 'Content-Type: application/json' --data "{\"skillId\":\"$id\",\"payload\":{\"title\":\"Phase 0 verification $STAMP\",\"text\":\"Market research report on competitor pricing\",\"sources\":[{\"name\":\"Master Architecture v1.3\",\"url\":\"\"}],\"lines\":[{\"description\":\"QA item\",\"qty\":2,\"unitPrice\":5}],\"jobId\":\"$SKILL_JOB_ID\",\"to\":\"REVIEW\"}}" "$BASE/api/skills")"
+  RES="$(curl -s -X POST "${SEC_HEADERS[@]}" --data "{\"skillId\":\"$id\",\"payload\":{\"title\":\"Phase 0 verification $STAMP\",\"text\":\"Market research report on competitor pricing\",\"sources\":[{\"name\":\"Master Architecture v1.3\",\"url\":\"\"}],\"lines\":[{\"description\":\"QA item\",\"qty\":2,\"unitPrice\":5}],\"jobId\":\"$SKILL_JOB_ID\",\"to\":\"REVIEW\"}}" "$BASE/api/skills")"
   OK="$(printf '%s' "$RES" | grep -c '"ok":true' || true)"
   SHA="$(printf '%s' "$RES" | grep -o '"sha256":"[a-f0-9]*"' | tail -1 | cut -c11-26)"
   if [ "$OK" = "1" ]; then SKILL_OK=$((SKILL_OK+1)); else SKILL_FAIL=$((SKILL_FAIL+1)); fi
@@ -43,26 +48,26 @@ echo "skill_executed_ok=$SKILL_OK"
 echo "skill_failed=$SKILL_FAIL"
 
 echo "--- create + route + persist a real job (explicit department) ---"
-CREATE="$(curl -s -X POST -H 'Content-Type: application/json' --data "{\"action\":\"create\",\"title\":\"Phase 0 explicit job $STAMP\",\"departmentId\":\"10\"}" "$BASE/api/jobs")"
+CREATE="$(curl -s -X POST "${SEC_HEADERS[@]}" --data "{\"action\":\"create\",\"title\":\"Phase 0 explicit job $STAMP\",\"departmentId\":\"10\"}" "$BASE/api/jobs")"
 printf '%s\n' "$CREATE" | head -c 420
 echo
 JOB_ID="$(printf '%s' "$CREATE" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);console.log(j.job?.jobId||'')})")"
 echo "created_job_id=$JOB_ID"
 
 echo "--- keyword routing (no departmentId) ---"
-AUTO="$(curl -s -X POST -H 'Content-Type: application/json' --data "{\"action\":\"create\",\"title\":\"Market research report for Q4 $STAMP\"}" "$BASE/api/jobs")"
+AUTO="$(curl -s -X POST "${SEC_HEADERS[@]}" --data "{\"action\":\"create\",\"title\":\"Market research report for Q4 $STAMP\"}" "$BASE/api/jobs")"
 printf '%s' "$AUTO" | grep -o '"routing":{"id":"[0-9]*","basis":"[a-z]*","matchedKeywords":\[[^]]*\]' || true
 printf '%s' "$AUTO" | grep -o '"department":"[0-9]*"' | head -1
 
 echo "--- invalid routing is rejected (deferred department) ---"
-curl -s -X POST -H 'Content-Type: application/json' --data '{"action":"create","title":"should fail","departmentId":"06"}' "$BASE/api/jobs" | head -c 200
+curl -s -X POST "${SEC_HEADERS[@]}" --data '{"action":"create","title":"should fail","departmentId":"06"}' "$BASE/api/jobs" | head -c 200
 echo
 
 echo "--- status transition (real state machine) ---"
-TRANS="$(curl -s -X POST -H 'Content-Type: application/json' --data "{\"action\":\"transition\",\"jobId\":\"$JOB_ID\",\"to\":\"REVIEW\"}" "$BASE/api/jobs")"
+TRANS="$(curl -s -X POST "${SEC_HEADERS[@]}" --data "{\"action\":\"transition\",\"jobId\":\"$JOB_ID\",\"to\":\"REVIEW\"}" "$BASE/api/jobs")"
 printf '%s' "$TRANS" | grep -o '"status":"[A-Z_]*"' | head -1
 echo "--- illegal transition is rejected ---"
-curl -s -X POST -H 'Content-Type: application/json' --data "{\"action\":\"transition\",\"jobId\":\"$JOB_ID\",\"to\":\"COMPLETE\"}" "$BASE/api/jobs" | head -c 200
+curl -s -X POST "${SEC_HEADERS[@]}" --data "{\"action\":\"transition\",\"jobId\":\"$JOB_ID\",\"to\":\"COMPLETE\"}" "$BASE/api/jobs" | head -c 200
 echo
 
 echo "--- reload: prove the job was persisted, not just returned ---"

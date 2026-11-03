@@ -1,25 +1,42 @@
 /**
- * GIMMS — OWNER REGISTRATION (Founder / Owner / Super Admin), local-first.
+ * GIMMS — OWNER IDENTITY, SESSIONS AND THE ADMIN GATE.
  *
- * Creates ONE local Owner account with an employee profile, permissions and a
- * REAL working login. Security properties:
+ * Security properties:
  *  - scrypt (Node built-in crypto) with a random 16-byte salt; only the derived
  *    hash is stored. The password is NEVER returned, logged, printed or persisted.
- *  - constant-time comparison; failed-attempt lockout (5 attempts / 10 min).
- *  - random 32-byte session token; only its SHA-256 is stored; 8h expiry.
- *  - httpOnly, SameSite=Lax cookie (see app/api/owner/route.ts).
+ *  - constant-time comparison; failed-attempt lockout (5 attempts / 10 min) PLUS an
+ *    IP-scoped rate limit in the route handler.
+ *  - random 32-byte session token; only its SHA-256 is stored; 8h expiry, idle-safe.
+ *  - httpOnly cookie. In production the name is `__Host-` prefixed, which the browser
+ *    only accepts with Secure + Path=/ + no Domain. That makes subdomain cookie
+ *    injection structurally impossible. `SameSite=Lax` is kept so that top-level
+ *    navigation to /admin after login works.
+ *  - Session records are written ATOMICALLY (temp file + rename) so a crash cannot
+ *    leave a half-written JSON that would silently log the Owner out or corrupt the
+ *    hash chain.
  *
- * HONEST BOUNDARIES (do not overstate):
- *  - LOCAL DEV AUTH ONLY. No Supabase Auth, no SSO, no MFA, no email verification,
- *    no password reset email, no production identity provider, no RLS.
- *  - No real Owner name/email/credentials are invented. `email: null`,
- *    `realDetailsStored: false`, `profileComplete: false`.
+ * WHY REGISTRATION IS NOW GATED (changed in this patchset):
+ *  The previous build let ANY anonymous visitor who reached /chat first create the
+ *  Owner account — i.e. take over the hub. Registration now requires ONE of:
+ *    a) an existing valid Owner session (adding a second device), or
+ *    b) a matching `OWNER_BOOTSTRAP_TOKEN` header when that env var is set, or
+ *    c) the `GIMMS_ALLOW_FIRST_RUN_CLAIM` escape hatch (non-production only).
+ *  If the hub is already registered, registration is refused outright.
+ *
+ * HONEST BOUNDARIES — do not overstate this:
+ *  - This is NOT Supabase Auth / SSO / MFA / email verification and there is no
+ *    password-reset email. It is a single-tenant Owner gate.
+ *  - ON VERCEL THE FILE STORE IS EPHEMERAL. `data/gimms-owner.json` lives in /tmp or
+ *    a build-time read-only path, so a registration performed on one serverless
+ *    instance is NOT durable across deployments or instances. Durable identity
+ *    requires Supabase (see PHASE1-SECURITY-DIAGNOSTIC.md §5). This module therefore
+ *    now REFUSES to report a healthy durable state when it detects a Vercel filesystem.
  *  - No external call, no email, no personal account connected, no deploy.
- *  - The Owner sets their OWN password through the local UI. This module never
- *    receives a password from chat and never asks for one.
+ *  - The Owner sets their OWN password through the UI. This module never receives a
+ *    password from chat and never asks for one.
  *
- * Storage: data/gimms-owner.json (git-ignored). File-only: no in-memory cache,
- * so deleting the file genuinely returns the app to UNREGISTERED.
+ * Storage: data/gimms-owner.json (git-ignored). No in-memory cache, so deleting the
+ * file genuinely returns the app to UNREGISTERED.
  */
 
 import fs from "node:fs";
@@ -27,12 +44,19 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { auditEntry } from "@/lib/store";
 import { hash } from "@/lib/jobs";
+import { ownerCookieName, OWNER_COOKIE_NAMES } from "@/lib/cookie-names";
+import { hasVar, isVercel, isProduction } from "@/lib/env";
 
 const FILE = path.join(/*turbopackIgnore: true*/ process.cwd(), "data", "gimms-owner.json");
-export const OWNER_COOKIE = "gimms_owner_session";
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const MAX_FAILED = 5;
 const LOCK_MS = 10 * 60 * 1000;
+
+/**
+ * Backwards-compatible export. Resolves per-environment:
+ * `__Host-gimms_owner_session` in production, `gimms_owner_session` in development.
+ */
+export const OWNER_COOKIE = ownerCookieName(isProduction);
 
 export const OWNER_PERMISSIONS = [
   "owner.chat.command",
@@ -120,12 +144,25 @@ function write(data: OwnerFile): boolean {
   });
   try {
     fs.mkdirSync(path.dirname(FILE), { recursive: true });
-    fs.writeFileSync(FILE, JSON.stringify(data, null, 2), "utf8");
+    // Atomic write: a crash mid-write must never leave truncated session state.
+    const temporary = `${FILE}.${process.pid}.tmp`;
+    fs.writeFileSync(temporary, JSON.stringify(data, null, 2), { encoding: "utf8", mode: 0o600 });
+    fs.renameSync(temporary, FILE);
     return true;
   } catch {
     return false;
   }
 }
+
+/**
+ * True when the runtime filesystem can be trusted to persist the Owner record.
+ * On Vercel serverless: the project directory is read-only and /tmp is per-instance
+ * and wiped on cold start, so a JSON file can never be the durable identity store.
+ */
+export function ownerStoreIsDurable(): boolean {
+  return !isVercel;
+}
+
 
 function derive(password: string, saltHex: string): string {
   return crypto.scryptSync(password, Buffer.from(saltHex, "hex"), 64).toString("hex");
@@ -147,19 +184,25 @@ function audit(data: OwnerFile, action: string, detail: string): void {
 }
 
 export const SECURITY_BOUNDARIES = [
-  "LOCAL DEV auth only — no Supabase Auth / SSO / MFA / email verification",
+  "Single-tenant Owner gate — no Supabase Auth / SSO / MFA / email verification, no password-reset email",
   "scrypt salted hash only; password never stored, returned, logged or shown in chat",
-  "httpOnly + SameSite=Lax session cookie, 8h expiry, token stored as SHA-256 only",
-  "5 failed attempts → 10 minute lockout; constant-time password comparison",
+  "httpOnly session cookie; __Host- prefixed + Secure in production; SameSite=Lax; 8h expiry",
+  "Session token stored only as SHA-256; session file written atomically (0600)",
+  "5 failed attempts → 10 minute lockout, plus an IP-scoped rate limit in the route",
+  "Registration closed once registered; first-run claim requires OWNER_BOOTSTRAP_TOKEN in production",
   "No real Owner identity invented: email null, realDetailsStored false",
   "No email sent, no personal account connected, no external API call, no deploy",
-  "Production-grade identity provider remains BLOCKED pending separate Owner approval",
+  "ON VERCEL THE FILE STORE IS EPHEMERAL — durable identity requires a Supabase-backed store (open item)",
 ] as const;
 
 export function ownerStatus() {
   const data = read();
   return {
     registered: data.registered,
+    durable: ownerStoreIsDurable(),
+    cookieName: OWNER_COOKIE,
+    registrationOpen: !data.registered,
+    bootstrapTokenRequired: hasVar("OWNER_BOOTSTRAP_TOKEN"),
     profile: data.profile,
     loginState: data.registered ? "REGISTERED" : "UNREGISTERED",
     permissions: data.profile?.permissions ?? [],
@@ -176,6 +219,53 @@ export function ownerStatus() {
     auditCount: data.auditTrail.length,
     sha256: data.sha256,
   };
+}
+
+/**
+ * Can a registration request proceed? See the module header for the three
+ * permitted paths. Returns a reason string when refused.
+ */
+export function registrationGate(request: Request): { ok: boolean; reason?: string; via?: string } {
+  const data = read();
+  if (data.registered) {
+    return { ok: false, reason: "Owner account already registered. Registration is closed; use login or change-password." };
+  }
+
+  const existingSession = verifySession(sessionFromRequest(request));
+  if (existingSession) return { ok: true, via: "existing-owner-session" };
+
+  const provided = request.headers.get("x-gimms-bootstrap-token")?.trim() || "";
+  if (hasVar("OWNER_BOOTSTRAP_TOKEN")) {
+    const expected = (process.env.OWNER_BOOTSTRAP_TOKEN || "").trim();
+    if (provided.length > 0 && timingSafeStringEqual(provided, expected)) {
+      return { ok: true, via: "bootstrap-token" };
+    }
+    return {
+      ok: false,
+      reason:
+        "First-run registration requires the OWNER_BOOTSTRAP_TOKEN header (x-gimms-bootstrap-token) because one is configured for this deployment.",
+    };
+  }
+
+  // An unregistered, token-less deployment is a genuine first run. Refuse it in
+  // production unless the Owner explicitly opted in, so a public URL cannot be
+  // claimed by whoever loads /chat first.
+  if (isProduction && process.env.GIMMS_ALLOW_FIRST_RUN_CLAIM !== "1") {
+    return {
+      ok: false,
+      reason:
+        "First-run registration is disabled in production. Set OWNER_BOOTSTRAP_TOKEN in Vercel, then send it as x-gimms-bootstrap-token — or pre-create the Owner through the Supabase-backed store.",
+    };
+  }
+
+  return { ok: true, via: isProduction ? "explicit-first-run-flag" : "local-development" };
+}
+
+function timingSafeStringEqual(a: string, b: string): boolean {
+  const left = Buffer.from(a, "utf8");
+  const right = Buffer.from(b, "utf8");
+  if (left.length !== right.length) return false;
+  return crypto.timingSafeEqual(left, right);
 }
 
 export function registerOwner(input: { password?: unknown; displayName?: unknown }): {
@@ -293,11 +383,49 @@ export function verifySession(token: string | null | undefined): OwnerProfile | 
 
 export function sessionFromRequest(request: Request): string | null {
   const cookie = request.headers.get("cookie") || "";
+  const parsed: Record<string, string> = {};
   for (const part of cookie.split(";")) {
     const [name, ...rest] = part.trim().split("=");
-    if (name === OWNER_COOKIE) return decodeURIComponent(rest.join("="));
+    if (!name) continue;
+    try {
+      parsed[name] = decodeURIComponent(rest.join("="));
+    } catch {
+      parsed[name] = rest.join("=");
+    }
+  }
+  for (const name of OWNER_COOKIE_NAMES) {
+    const value = parsed[name];
+    if (value) return value;
   }
   return null;
+}
+
+/**
+ * Cookie attributes for the session. `secure` is forced on in production, which is a
+ * hard requirement of the `__Host-` prefix.
+ */
+export function ownerSessionCookie(token: string): {
+  name: string;
+  value: string;
+  options: {
+    httpOnly: true;
+    sameSite: "lax";
+    path: "/";
+    secure: boolean;
+    maxAge: number;
+  };
+} {
+  return {
+    name: OWNER_COOKIE,
+    value: token,
+    options: {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      secure: isProduction,
+      maxAge: Math.floor(SESSION_TTL_MS / 1000),
+    },
+  };
 }
 
 export function requireOwner(request: Request): { ok: true; profile: OwnerProfile } | { ok: false; error: string; status: number } {

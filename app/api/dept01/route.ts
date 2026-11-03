@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireOwnerWrite, authTag } from "@/lib/api-auth";
 import {
   summary as dept01Summary,
   allRecords,
@@ -65,6 +66,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = requireOwnerWrite(request);
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
+  }
+
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const action = String(body.action ?? "").trim();
 
@@ -98,7 +104,7 @@ export async function POST(request: Request) {
       artifactVersion,
     });
     return NextResponse.json(
-      { ...result, note: "Record-only decision. No payment, no deploy, no permission change." },
+      { ...result, ...authTag(auth), note: "Record-only decision. No payment, no deploy, no permission change." },
       { status: result.ok ? 200 : 400, headers: NO_STORE },
     );
   }
@@ -108,7 +114,7 @@ export async function POST(request: Request) {
     if (!skillId) return NextResponse.json({ ok: false, error: "skillId is required" }, { status: 400, headers: NO_STORE });
     const payload = (body.payload ?? {}) as Record<string, unknown>;
     const result = runSkill(skillId, payload);
-    return NextResponse.json(result, { status: result.ok ? 200 : 400, headers: NO_STORE });
+    return NextResponse.json({ ...result, ...authTag(auth) }, { status: result.ok ? 200 : 400, headers: NO_STORE });
   }
 
   if (action === "command") {
@@ -116,7 +122,7 @@ export async function POST(request: Request) {
     if (!command) return NextResponse.json({ ok: false, error: "command is required" }, { status: 400, headers: NO_STORE });
     const payload = { ...((body.payload ?? {}) as Record<string, unknown>), command };
     const result = runSkill("owner.command.execute", payload);
-    return NextResponse.json(result, { status: result.ok ? 200 : 400, headers: NO_STORE });
+    return NextResponse.json({ ...result, ...authTag(auth) }, { status: result.ok ? 200 : 400, headers: NO_STORE });
   }
 
   return NextResponse.json(

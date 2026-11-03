@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireOwnerWrite, authTag } from "@/lib/api-auth";
 import { readState, writeState, newId, auditEntry } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = requireOwnerWrite(request);
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
+  }
+
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const title = String(body.title ?? "").trim();
   if (!title) {
@@ -40,7 +46,7 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json(
-    { ok: true, storage, persisted, task: state.tasks[0], count: state.tasks.length },
+    { ok: true, ...authTag(auth), storage, persisted, task: state.tasks[0], count: state.tasks.length },
     { status: 201, headers: NO_STORE },
   );
 }

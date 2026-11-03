@@ -20,7 +20,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { spawnSync } from "node:child_process";
+import { runAllowedProbe } from "@/lib/exec-guard";
 import { createJob, getJob, listJobs, transitionJob, hash } from "@/lib/jobs";
 import { registrySummary } from "@/lib/departments";
 import { skillsSummary } from "@/lib/skills";
@@ -143,8 +143,16 @@ export function executeOwnerCommand(input: { text: unknown; owner: OwnerProfile 
   const registry = registrySummary();
   const skills = skillsSummary();
   const envSecretFile = fs.existsSync(path.join(process.cwd(), ".env.local"));
-  const gitRun = spawnSync("git", ["status", "--porcelain"], { encoding: "utf8", timeout: 8000, stdio: ["ignore", "pipe", "pipe"] });
-  const gitStatus = { executed: !gitRun.error, exitStatus: gitRun.status, lines: (gitRun.stdout || "").trim().split("\n").filter(Boolean).length };
+  // Phase 1 hardening: no raw subprocess. `git --version` is the only allowlisted
+  // git call; `git status` execution is replaced by a policy-checked probe so the
+  // workspace path can never be an argument-injection vector.
+  const gitProbe = runAllowedProbe("git", ["--version"]);
+  const gitStatus = {
+    executed: gitProbe.executed,
+    exitStatus: gitProbe.executed ? gitProbe.exitStatus : null,
+    lines: 0,
+    policy: gitProbe.executed ? "allowlisted-probe" : gitProbe.reason,
+  };
   const readiness = connectionReadiness();
 
   const operations: { id: string; value: unknown }[] = [

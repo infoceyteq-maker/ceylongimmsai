@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireOwnerWrite, authTag } from "@/lib/api-auth";
 import {
   AI_TEAM,
   AI_MODEL_REGISTRY,
@@ -83,6 +84,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = requireOwnerWrite(request);
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status, headers: NO_STORE });
+  }
+
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const action = String(body.action ?? "").trim();
 
@@ -101,12 +107,12 @@ export async function POST(request: Request) {
 
   if (action === "route") {
     const result = routeAiRequest(body as Record<string, unknown>);
-    return NextResponse.json(result, { status: result.ok ? 200 : 400, headers: NO_STORE });
+    return NextResponse.json({ ...result, ...authTag(auth) }, { status: result.ok ? 200 : 400, headers: NO_STORE });
   }
 
   if (action === "communication-plan") {
     const result = buildCommunicationPlan(body as Record<string, unknown>);
-    return NextResponse.json(result, { status: result.ok ? 200 : 400, headers: NO_STORE });
+    return NextResponse.json({ ...result, ...authTag(auth) }, { status: result.ok ? 200 : 400, headers: NO_STORE });
   }
 
   if (action === "readiness") {

@@ -9,9 +9,10 @@ on:
   pull_request:
     branches: [main]
   push:
-    # Runs on main and on the active Arena working branch so a real CI run can
-    # be proven without merging to main first.
-    branches: [main, arena/407a881c-ceylongimmsai]
+    # Runs on main and on any Arena working branch so a real CI run can be
+    # proven without merging to main first. (Was pinned to one dead branch until
+    # Phase 1, which meant CI silently stopped running on every later branch.)
+    branches: [main, "arena/**"]
 
 permissions:
   contents: read
