@@ -16,3 +16,9 @@ data/dept01-artifacts/
 # P3 Owner Chat local runtime state (credentials hash + conversation; NEVER commit)
 data/gimms-owner.json
 data/gimms-chat.json
+
+# Phase 2 — Agent worker + job runtime state
+data/gimms-agent-jobs.json
+agent-worker/node_modules/
+agent-worker/.env
+agent-worker/package-lock.json

@@ -1,0 +1,38 @@
+{
+  "name": "AI GIMMS Hub — cloud dev",
+
+  "//": [
+    "The Owner's Windows machine cannot run PowerShell or Node right now.",
+    "This devcontainer makes GitHub Codespaces the replacement terminal: open the",
+    "repo on github.com, press '.' (or Code → Codespaces → Create), and every",
+    "command below is available in the browser. Nothing is installed locally.",
+    "All commands in docs/PHASE-TERMINAL-COMMANDS.md are bash and run here."
+  ],
+
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "postCreateCommand": "npm install --no-audit --no-fund",
+
+  "forwardPorts": [3000, 8080],
+  "portsAttributes": {
+    "3000": { "label": "AI GIMMS Hub", "onAutoForward": "notify" },
+    "8080": { "label": "Agent worker", "onAutoForward": "silent" }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+
+  "remoteUser": "node"
+}

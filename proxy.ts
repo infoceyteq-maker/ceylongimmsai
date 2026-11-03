@@ -53,7 +53,7 @@ function structuralSessionPresent(request: NextRequest): boolean {
   return false;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   const isAdminApi = pathname.startsWith("/api/admin");
