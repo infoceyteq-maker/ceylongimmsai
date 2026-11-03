@@ -39,7 +39,11 @@ jobs:
         env:
           # Set a repository variable named GIMMS_LIVE_BASE to override the target.
           BASE: ${{ vars.GIMMS_LIVE_BASE || 'https://ai-gimms-hub.vercel.app' }}
-        run: bash scripts/verify-live.sh 2>&1 | tee verification-results.txt
+        # pipefail is required: without it, `tee` masks a failing verification
+        # script and the workflow reports a false PASS.
+        run: |
+          set -euo pipefail
+          bash scripts/verify-live.sh 2>&1 | tee verification-results.txt
 
       - name: Upload real evidence
         if: always()

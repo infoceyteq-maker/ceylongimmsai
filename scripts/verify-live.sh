@@ -52,6 +52,11 @@ say ""
 say "--- 3. Data exposure ---"
 BOOTSTRAP="$(curl -s "$BASE/api/bootstrap")"
 say "$BOOTSTRAP" | grep -o '"storage":"[a-z]*"'
+if say "$BOOTSTRAP" | grep -q '"authenticated":false'; then
+  pass "anonymous bootstrap is not authenticated"
+else
+  fail "anonymous bootstrap does not report authenticated:false"
+fi
 if say "$BOOTSTRAP" | grep -q '"redacted":\["clients","audit"\]'; then
   pass "anonymous bootstrap redacts clients + audit"
 else
@@ -61,6 +66,11 @@ if say "$BOOTSTRAP" | grep -q '"clients":\['; then
   fail "anonymous bootstrap still returns the clients array"
 else
   pass "clients array absent from anonymous bootstrap"
+fi
+if say "$BOOTSTRAP" | grep -q '"audit":\['; then
+  fail "anonymous bootstrap still returns the audit array"
+else
+  pass "audit array absent from anonymous bootstrap"
 fi
 
 say ""
@@ -81,10 +91,14 @@ gate GET /api/admin/agent 401
 
 say ""
 say "--- 5. CSRF guard (cross-origin POST must be 403) ---"
+# NON-WRITING PROBE: send an empty JSON object, never a valid task title.
+# On a hardened build the CSRF guard rejects before validation (403).
+# On a stale/unprotected build this fails validation (400) instead of creating
+# a real task record. Either way the monitor must not write business data.
 CSRF_CODE="$(curl -s -o /dev/null -w '%{http_code}' -X POST \
   -H 'Content-Type: application/json' \
   -H 'Origin: https://evil.example' \
-  -d '{"title":"csrf-probe"}' \
+  -d '{}' \
   "$BASE/api/tasks")"
 if [ "$CSRF_CODE" = "403" ]; then pass "cross-origin POST /api/tasks -> 403"; else fail "cross-origin POST /api/tasks -> $CSRF_CODE (expected 403)"; fi
 
