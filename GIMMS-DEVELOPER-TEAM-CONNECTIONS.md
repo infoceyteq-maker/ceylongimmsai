@@ -5,7 +5,7 @@
 **Request:** *"Connect everything needed to move forward … we now need to build a good Developer Team."*  
 **Raw evidence:** `developer-team-ci-verification.txt` (CI-safe harness), `owner-chat-verification.txt`, `prod-ai-team-verification.txt`, `dept01-verification.txt`, `phase0-verification.txt`  
 **Result:** **`DEV_TEAM_CI_TESTS_PASS=29`, `FAIL=0`** · `tsc` 0 · `next build` 0 errors / 0 warnings · 17 static pages · 14 API routes
-**REAL GitHub Actions CI:** run `41554424863` → **success** in 40s, **11/11 steps passed**, artifact `gimms-developer-team-verification` uploaded (1305 bytes). Verified via `gh api .../actions/runs/41554424863/jobs`. Full log/artifact ZIP could not be downloaded into this sandbox (blob host outside outbound allowlist) — step conclusions, not assumed text, are the evidence.
+**REAL GitHub Actions CI:** two successful runs — `41554424863` (40s, 11/11 steps) and **`41554724345` (36s, 11/11 steps, definitive run on the final code)**. Artifact `gimms-developer-team-verification` uploaded (1305 bytes). Verified via `gh api .../actions/runs/<id>/jobs`. Full log/artifact ZIP could not be downloaded into this sandbox (blob host outside outbound allowlist) — step conclusions, not assumed text, are the evidence.
 
 ---
 
@@ -50,7 +50,7 @@
 | 1 | **GitHub repository (`gh` CLI)** | `CONNECTED` | `gh auth status` + `gh api` OK |
 | 2 | **GitHub REST API host** | `CONNECTED` | Real probe 200 |
 | 3 | **npm registry** | `CONNECTED` | Real probe 200 + `npm install` OK |
-| 4 | **GitHub Actions — Developer Team CI** | `CONNECTED` | Real run `41554424863` success (40s, 11/11 steps), `permissions: contents: read`, artifact uploaded |
+| 4 | **GitHub Actions — Developer Team CI** | `CONNECTED` | Real runs `41554424863` + `41554724345`, both 11/11 steps success, `permissions: contents: read`, artifact uploaded |
 | 5 | **Local toolchain** (node/npm/git/tsc/python3/unzip/gh) | `CONNECTED_LOCAL` | 7/7 real `--version` detection |
 | 6 | **GIMMS Development Agent** | `CONNECTED_LOCAL` | PR #7 + PR #8 harness (69/69) — deterministic, **not** an AI model |
 | 7 | **Single `/api/skills` gateway — 114 skills** | `CONNECTED_LOCAL` | P0 regression `skill_executed_ok=114`, `skill_failed=0` |
@@ -106,7 +106,7 @@
 
 **DONE & TESTED:** Real connection audit with network probes; GitHub/npm/local/toolchain/skills/Owner-Chat connections verified; Developer Team CI workflow + CI-safe harness (29/29); fail-closed activation layer + probes API; Owner-facing connections dashboard; `tsc`/`build` clean; all 3 pages 200.
 
-**BUILT BUT UNTESTED:** None claimed — every new surface was exercised locally AND the CI workflow produced a real successful run `41554424863` (11/11 steps). The log/artifact ZIP itself is outside this sandbox's outbound allowlist, so step conclusions were verified through the GitHub API rather than read as text.
+**BUILT BUT UNTESTED:** None claimed — every new surface was exercised locally AND the CI workflow produced two real successful runs `41554424863` and `41554724345` (11/11 steps each). The log/artifact ZIP itself is outside this sandbox's outbound allowlist, so step conclusions were verified through the GitHub API rather than read as text.
 
 **PARTIAL:** AI model config/routing exists (PR #7) but 0 connections; 29 development skills are spec-only; local dev auth only; GitHub App/OAuth optional future scope.
 
