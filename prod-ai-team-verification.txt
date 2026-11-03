@@ -1,0 +1,126 @@
+PROD_AI_TEAM_BASE=http://127.0.0.1:3000
+PROD_AI_TEAM_STAMP=20261102T235529Z
+SCOPE=INITIAL SETUP ONLY — AI Team Structure, Model Registry, Agent Roles, Required Dev Skills, Routing, Connection Framework, Communication Workflow
+PRECHECK_TSC_EXIT=0
+PRECHECK_BUILD_EXIT=0
+
+--- 1. AI Team Structure / Model Registry / Roles / Skills ---
+status_http=200 phase=P2-02-production-ai-team-structure-only
+summary={"teamConfigured":true,"department":"02","coordinator":"role-gimms-development-agent","modelsRegistered":3,"modelsConnected":0,"modelsRequiringApiAccess":3,"namedInitialModels":2,"extensibleSlots":1,"futureCandidateFamilies":8,"agentRoles":4,"agentRolesWithFullContract":4,"requiredDevelopmentSkills":29,"developmentSkillsImplemented":0,"existingReusableSkills":15,"connectionSlots":3,"registeredConnections":0,"pluginsRegistered":0,"mcpServers":0,"sdkInstalled":0,"workflowStages":9,"externalMessagesSent":0,"softwareProjectsStarted":0,"productsGenerated":0,"authenticatedConnectionTests":0,"credentialsConfigured":0,"credentialsRequested":0,"deploymentPerformed":false}
+PASS | config endpoint returns HTTP 200
+PASS | team belongs to Production department 02
+PASS | GIMMS Development Agent is Team Coordinator
+PASS | team is configured but NO model connected
+PASS | no software project started / no product generated
+models=model-chatgpt-openai-gpt:REQUIRES_API_ACCESS:connected=false | model-google-ai-studio-gemini:REQUIRES_API_ACCESS:connected=false | model-additional-ai-slot:FUTURE_SLOT_READY:connected=false
+PASS | 3 initially included model entries | count=3
+PASS | ChatGPT / OpenAI GPT registered as Coding & Development AI
+PASS | Google AI Studio / Gemini registered as Coding & Technical AI
+PASS | Additional AI Models extensible slot present
+PASS | 0 models connected / 0 authenticated tests / 0 SDKs installed
+PASS | 2 named models require API access
+PASS | no exact model IDs invented
+PASS | provider facts explicitly UNVERIFIED
+PASS | credential NAMES only, none configured
+PASS | 8 Master Doc §5 future families kept as NOT REGISTERED candidates
+roles=role-gimms-development-agent:CONFIGURED_LOCAL_DETERMINISTIC | role-chatgpt-openai-gpt:REQUIRES_API_ACCESS | role-google-ai-studio-gemini:REQUIRES_API_ACCESS | role-additional-ai-models:FUTURE_SLOT
+PASS | 4 AI agent roles configured
+PASS | every role has functions/inputs/outputs/skills/permissions/approvals
+PASS | every role is modelConnected:false
+PASS | coordinator is a native deterministic role contract
+PASS | 2 external model roles require API access
+PASS | every role skill reference resolves | []
+required_dev_skills=29 implemented=0
+PASS | required development skills specification >= 25 entries | count=29
+PASS | ALL development skills are SPEC ONLY, executable:false
+PASS | each skill has inputs/outputs/executable steps + architecture + approval gates
+PASS | existing verified local skills reused, not duplicated
+PASS | code.scaffold reuse is honestly marked DRAFT-only
+
+--- 2. API / Plugin Connection Framework + Team Communication Workflow ---
+framework=FRAMEWORK_ONLY_NOT_CONNECTED plugins=0 mcp=0 configuredCredentials=0
+PASS | framework is NOT_CONNECTED with 0 plugins/MCP/SDK
+PASS | connected:true requires an authenticated test
+PASS | credential policy: server-side only, names only, 0 configured/requested
+PASS | 3 connection slots, all NOT_REGISTERED with 0 gates passed
+workflow_stages=9 delivery=LOCAL_ONLY_NOT_SENT externalChannels=0
+PASS | 9 communication stages including QA, human handoff and OWNER APPROVAL
+PASS | workflow is LOCAL_ONLY_NOT_SENT with 0 external channels/messages
+PASS | routing rules configured for 8 task types
+
+--- 3. Model Selection & Routing (PLAN ONLY, no model call) ---
+route coding: http=200 type=code_generation model=model-chatgpt-openai-gpt basis=keyword:code_generation dept=10/fallback sha=5d78b734b3148825
+PASS | route coding selects code_generation → model-chatgpt-openai-gpt
+route architecture: http=200 type=architecture model=model-google-ai-studio-gemini basis=keyword:architecture dept=01/keyword sha=f78724824ef79b10
+PASS | route architecture selects architecture → model-google-ai-studio-gemini
+route debugging: http=200 type=debugging model=model-google-ai-studio-gemini basis=keyword:debugging dept=09/keyword sha=221f6d3fb83834fd
+PASS | route debugging selects debugging → model-google-ai-studio-gemini
+route docs: http=200 type=documentation model=model-chatgpt-openai-gpt basis=explicit-task-type dept=10/fallback sha=608dd1a4c615d30c
+PASS | route docs selects documentation → model-chatgpt-openai-gpt
+route technical research: http=200 type=technical_research model=model-google-ai-studio-gemini basis=keyword:technical_research dept=04/keyword sha=8b571f625bdee1b1
+PASS | route technical research selects technical_research → model-google-ai-studio-gemini
+override: model=model-google-ai-studio-gemini applied=true allowExternal=true
+PASS | Owner model override is honoured in the PLAN
+PASS | unknown model override is rejected without failing the plan
+no_match: type=general model=null basis=fallback-no-match
+PASS | unmatched request falls back to coordinator, no model invented
+PASS | empty request is rejected
+PASS | EVERY routing result is planOnly / non-executable / 0 model calls / 0 external calls
+PASS | EVERY routing result is BLOCKED (no AI model connected)
+PASS | EVERY routing result has a safe human fallback + SHA-256 evidence
+PASS | allowExternal=true is ignored while 0 models are connected
+PASS | routing reuses existing department router (evidence present)
+
+--- 4. Team Communication Workflow (LOCAL DRAFT envelopes) ---
+plan http=200 id=comm_727ac166cd3ea3cd envelopes=9 sha=623971595b64404a
+stages=1:OWNER_REQUEST:REQUEST | 2:COORDINATOR_INTAKE:INTAKE_DRAFT | 3:TASK_DECOMPOSITION:SPEC_DRAFT | 4:MODEL_ROUTING_PLAN:ROUTING_PLAN | 5:ASSIGNMENT_REQUEST:BLOCKED_NO_API | 6:DEVELOPMENT_WORK:NOT_STARTED | 7:QUALITY_CHECK:LOCAL_CHECKS_ONLY | 8:HUMAN_HANDOFF:ESCALATION | 9:OWNER_APPROVAL:PENDING_DECISION
+PASS | communication plan returns HTTP 200 with 9 envelopes
+PASS | all envelopes are DRAFT / LOCAL_ONLY_NOT_SENT / non-executable
+PASS | all envelopes have deterministic SHA-256 evidence
+PASS | 0 external messages / 0 model calls / 0 jobs / 0 projects
+PASS | ASSIGNMENT_REQUEST is BLOCKED_NO_API and DEVELOPMENT_WORK NOT_STARTED
+PASS | OWNER_APPROVAL remains PENDING
+PASS | plan includes routing evidence + readiness gates
+PASS | plan is non-executable with a human handoff
+readiness slots=3 passing=false registered=0
+PASS | readiness reports 3 slots, 0 gates passed, 0 registered connections
+connect action -> HTTP 403 connected=false
+PASS | connect action is REFUSED with HTTP 403
+PASS | unknown action is rejected (no accidental product generation)
+
+--- 5. Honesty / no-change regression ---
+connect connected=0 channels=5
+PASS | existing /api/connect still connected:0 (5 channels)
+bootstrap provider=demo publishing=MANUAL connected=0
+PASS | no AI provider / MANUAL publishing / 0 connected
+skills_total=114 requiresExternal=0
+PASS | existing skills gateway UNCHANGED at 114 skills / 0 external
+registry={"total":10,"active":7,"deferred":3,"priorityOrder":["01","02","04","03","05","09","10"],"deferredIds":["06","07","08"],"divisions":69,"roles":156} dept02_divisions=9 dept02_skills=6 dept01_skills=83
+PASS | department registry UNCHANGED (10/7/3, 69 divisions, 156 roles)
+PASS | Dept 02 registry UNCHANGED (9 divisions, 6 skills, 0 needs connected)
+PASS | Dept 01 UNCHANGED (83 local skills)
+PASS | Dept 01 honesty state UNCHANGED
+PASS | no new npm dependency / no AI SDK installed
+PASS | no .env.local present
+modified_tracked_files=0 
+PASS | NO existing tracked module was modified (new files only) | none
+
+--- 6. Phase 0 regression (unchanged skills gateway) ---
+P0 PHASE0_BASE=http://127.0.0.1:3000
+P0 PHASE0_STAMP=20261102T235531Z
+P0 "summary":{"total":10,"active":7,"deferred":3,"priorityOrder":["01","02","04","03","05","09","10"],"deferredIds":["06","07","08"],"divisions":69,"roles":156}
+P0 active_p0_count 7
+P0 deferred_count 3
+P0 skill_executed_ok=114
+P0 skill_failed=0
+P0 job_present_after_reload 1
+P0 "connected":0
+P0 PHASE0_VERIFICATION_DONE=20261102T235531Z
+PASS | Phase 0 harness: 0 skill failures | skill_failed=0
+PASS | Phase 0 harness: registry still 10/7/3
+PASS | Phase 0 harness: connected stays 0
+
+PROD_AI_TEAM_TESTS_PASS=71
+PROD_AI_TEAM_TESTS_FAIL=0
+PROD_AI_TEAM_VERIFICATION_DONE=20261102T235529Z
+HONESTY=CONFIG + LOCAL TESTS ONLY. 0 models connected, 0 API calls, 0 credentials, 0 plugins/MCP, 0 projects started, no deploy, no 100% completion claim.
