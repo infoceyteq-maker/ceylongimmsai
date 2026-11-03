@@ -1,5 +1,5 @@
-OWNER_CHAT_BASE=http://localhost:3010
-OWNER_CHAT_STAMP=20261103T161233Z
+OWNER_CHAT_BASE=http://127.0.0.1:3000
+OWNER_CHAT_STAMP=20261103T205428Z
 SCOPE=Activation of EXISTING Production AI Development Team through one real-time Owner Chat
 PRECHECK_TSC_EXIT=NOT_RUN
 PRECHECK_BUILD_EXIT=NOT_RUN
@@ -29,9 +29,9 @@ flow=["OWNER COMMAND","GIMMS CHAT","TASK CREATION","AI DEVELOPER ASSIGNMENT","EX
 PASS | chat overview returns 8-stage execution flow
 PASS | flow marks AI developer assignment BLOCKED
 PASS | empty conversation at start
-command http=200 jobId=job_mw0vz6x6jrg3oi checks=11/11 failed=0
+command http=200 jobId=job_mw161q8n7kq991 checks=11/11 failed=0
 routing=code_review selectedModel=model-chatgpt-openai-gpt basis=keyword:code_review
-blocked={"stage":"AI DEVELOPER ASSIGNMENT","reason":"No AI model is connected. 0 authenticated provider connections; official API access requires separate Owner approval.","connectedModels":0,"requiresOwnerApproval":true} result_sha256=245df118a840b073b21c416e71ae841a4a3caccda5ce0c8b405eb62fdfeb26ab
+blocked={"stage":"AI DEVELOPER ASSIGNMENT","reason":"No AI model is connected. 0 authenticated provider connections; official API access requires separate Owner approval.","connectedModels":0,"requiresOwnerApproval":true} result_sha256=0de0ba9355111296581d3c983e3b0dbf50da0d48ac53f6f41f0c18c207769fc1
 sse_http=200 sse_bytes=11343 event_lines=30
 PASS | REAL command returns 200 with a real jobId
 PASS | 8-stage flow executed with real job transitions
@@ -51,7 +51,7 @@ PASS | SSE carries >= 10 real event frames | count=30
 sse_sample=event: ready id: 1 event: info id: 2 event: progress id: 3 event: progress id: 4 event: progress id: 5 event: progress id: 6 event: blocked id: 7
 
 --- 3. Conversation history, job tracking, errors, Owner review ---
-counts={"messages":2,"events":29,"reviews":0,"commands":1} jobStatus=APPROVAL audit=7 snapshot_sha=6251ec4f5e27674d
+counts={"messages":2,"events":29,"reviews":0,"commands":1} jobStatus=APPROVAL audit=7 snapshot_sha=e2ec27203f4762e3
 PASS | conversation history persisted (owner + gimms messages)
 PASS | every message is labelled aiModelUsed:false
 PASS | real job tracked at APPROVAL with audit trail
@@ -61,7 +61,7 @@ PASS | snapshot hash is deterministic across reload
 PASS | empty command is rejected with real error
 PASS | unknown action is rejected (no accidental product generation)
 PASS | review of unknown job is rejected
-review http=200 id=review_mw0vz9wuz86bxx version=245df118a840b073
+review http=200 id=review_mw161t7womwpgw version=0de0ba9355111296
 PASS | REAL Owner review recorded with the versioned result
 PASS | review makes no money movement / no external calls
 PASS | review persisted; job stays at APPROVAL (no fake delivery)
@@ -95,9 +95,9 @@ page / http=200
 page /chat http=200
 page /departments/01 http=200
 PASS | real Owner Chat page is served (HTTP 200)
-modified_tracked=M dept01-verification.txt,M developer-team-ci-verification.txt,M owner-chat-verification.txt
+modified_tracked=M developer-team-ci-verification.txt,M owner-chat-verification.txt
 PASS | harness run dirties no tracked source/config file
-PASS | only evidence .txt artifacts and Next-generated next-env.d.ts may be dirty | dept01-verification.txt,developer-team-ci-verification.txt,owner-chat-verification.txt
+PASS | only evidence .txt artifacts and Next-generated next-env.d.ts may be dirty | developer-team-ci-verification.txt,owner-chat-verification.txt
 
 --- 6. Phase 0 regression ---
 P0 active_p0_count 7
@@ -105,7 +105,7 @@ P0 deferred_count 3
 P0 skill_executed_ok=114
 P0 skill_failed=0
 P0 "connected":0
-P0 PHASE0_VERIFICATION_DONE=20261103T161239Z
+P0 PHASE0_VERIFICATION_DONE=20261103T205433Z
 PASS | Phase 0 harness: 0 skill failures | skill_failed=0
 PASS | Phase 0 harness: registry still 7 active / 3 deferred
 PASS | Phase 0 harness: connected stays 0
@@ -118,5 +118,5 @@ PASS | no password value appears in this evidence file
 
 OWNER_CHAT_TESTS_PASS=72
 OWNER_CHAT_TESTS_FAIL=0
-OWNER_CHAT_VERIFICATION_DONE=20261103T161233Z
+OWNER_CHAT_VERIFICATION_DONE=20261103T205428Z
 HONESTY=Real commands/jobs/events/tests/results/reviews. 0 AI models connected, 0 model calls, 0 external API calls, 0 emails, 0 purchases, 0 deploys. AI developer execution BLOCKED, NOT simulated. NOT production-ready.

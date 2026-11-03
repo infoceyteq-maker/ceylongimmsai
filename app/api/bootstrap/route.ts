@@ -40,7 +40,11 @@ function publicState(state: HubState): { state: Partial<HubState>; redacted: str
 
 export async function GET(request: Request) {
   const { state, storage } = await readState();
-  const isOwner = Boolean(verifySession(sessionFromRequest(request)));
+  // verifySession is async (Supabase-backed owner store). It MUST be awaited:
+  // Boolean(Promise) is always true, which previously treated every anonymous
+  // caller as the Owner and bypassed clients/audit redaction.
+  const profile = await verifySession(sessionFromRequest(request));
+  const isOwner = Boolean(profile);
   const { state: view, redacted } = isOwner ? { state, redacted: [] as string[] } : publicState(state);
 
   return NextResponse.json(

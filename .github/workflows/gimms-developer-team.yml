@@ -34,6 +34,12 @@ jobs:
       - name: Install EXISTING locked dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Dependency vulnerability audit
+        run: npm audit --audit-level=high
+
+      - name: Secret pattern scan (tracked files, values never printed)
+        run: node scripts/scan-secrets.mjs
+
       - name: TypeScript typecheck
         run: npx tsc --noEmit
 
@@ -64,10 +70,40 @@ jobs:
           fi
           node scripts/verify-developer-team-ci.mjs
 
+      # Prove the same fixes fail closed under NODE_ENV=production, not only in
+      # the development bypass. Uses a random bootstrap token generated inside
+      # this step; no secret value is printed or stored in the repository.
+      - name: Production-mode security regressions
+        run: |
+          set -euo pipefail
+          export NODE_ENV=production
+          export OWNER_BOOTSTRAP_TOKEN="$(node -p "require('node:crypto').randomBytes(32).toString('hex')")"
+          export GIMMS_SECURITY_TEST_BOOTSTRAP_TOKEN="$OWNER_BOOTSTRAP_TOKEN"
+          npm run start -- -p 3011 > /tmp/gimms-next-start.log 2>&1 &
+          START_PID=$!
+          trap 'kill "$START_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3011/api/connect > /dev/null 2>&1; then
+              echo "PROD_SERVER_READY"
+              READY=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$READY" -ne 1 ]; then
+            echo "PROD_SERVER_FAILED"
+            cat /tmp/gimms-next-start.log
+            exit 1
+          fi
+          BASE=http://127.0.0.1:3011 node scripts/verify-security-regressions.mjs
+
       - name: Upload real evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gimms-developer-team-verification
-          path: developer-team-ci-verification.txt
+          path: |
+            developer-team-ci-verification.txt
+            security-regression-verification.txt
           if-no-files-found: warn
