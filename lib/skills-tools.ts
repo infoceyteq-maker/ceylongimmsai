@@ -58,7 +58,9 @@ function detect(id: string, command: string, args: string[], note: string): Loca
 
 export function detectLocalTools(): LocalTool[] {
   return [
-    detect("node", "node", ["-v"], "Runtime used by the local chat engine"),
+    // `node --version` — NOT `node -v`. Must match the exec-guard allowlist entry
+    // exactly, otherwise a genuinely allowlisted probe is reported BLOCKED_BY_POLICY.
+    detect("node", "node", ["--version"], "Runtime used by the local chat engine"),
     detect("npm", "npm", ["-v"], "Existing package manager; NO new package installed in this task"),
     detect("git", "git", ["--version"], "Real repository status checks in chat execution"),
     detect("gh", "gh", ["--version"], "Existing authorized GitHub CLI (repository ops only)"),

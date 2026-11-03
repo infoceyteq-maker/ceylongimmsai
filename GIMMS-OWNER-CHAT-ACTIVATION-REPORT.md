@@ -48,6 +48,10 @@ Owner Registration (සැබෑ local login සමග), Real-Time AI Chat (SSE)
 
 **Test totals:** `tsc` 0, `next build` 0/0, 18 static pages, `/chat` 200, **69/69 local tests**, P0 regression 114 skills / 0 failures / `connected:0`.
 
+> **Correction — 2026-11-03, after the Phase 1 hardening (PR #10).** Two numbers above were measured before `lib/exec-guard.ts` was locked down and are no longer true; they are left in place as the original reading, not silently rewritten.
+> **(a)** Row 5's *7/7 tools available* is now **2/7**. Only `git --version` and `node --version` are on the exec allowlist, so `npm`, `gh`, `python3`, `tsc` and `unzip` are reported `BLOCKED_BY_POLICY` — by design, because `npx tsc --version` could fetch and run a remote package.
+> **(b)** The **69/69** harness total is now **72/72** (`OWNER_CHAT_TESTS_PASS=72 FAIL=0`): the two assertions that encoded pre-Phase-1 state were replaced with exec-guard-aware ones, and a real probe bug (`node -v` instead of the allowlisted `node --version`) was fixed so a permitted probe no longer reports `BLOCKED_BY_POLICY`.
+
 ### 3. Which AI models are connected?
 
 | Model | Connected | Official API test | Status |

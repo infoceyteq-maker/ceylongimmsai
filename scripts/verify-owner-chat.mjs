@@ -233,7 +233,27 @@ async function main() {
   check("registry exposes 29 spec-only development skills (0 implemented)", reg.developmentSkillSpecifications?.total === 29 && reg.developmentSkillSpecifications.implemented === 0);
   check("8 essential skill groups prepared", reg.essentialSkillGroups?.length === 8 && reg.summary?.essentialGroups === 8);
   check("skill groups honestly split executable / partial / framework-only", reg.summary?.executableLocalGroups === 4 && reg.summary?.partialGroups === 3 && reg.summary?.frameworkOnlyGroups === 1);
-  check("real local tools detected (not invented)", reg.localTools?.length === 7 && reg.summary?.localToolsAvailable >= 5);
+  // Phase 1 narrowed lib/exec-guard.ts to exactly `git --version` + `node --version`.
+  // The old expectation here was `localToolsAvailable >= 5`, which predates that
+  // hardening and could only pass by re-opening the exec surface. Assert the honest
+  // result instead: a non-allowlisted probe must be BLOCKED_BY_POLICY, never a version.
+  const EXEC_ALLOWLIST_IDS = ["node", "git"];
+  const tools = reg.localTools ?? [];
+  const availableIds = tools.filter((tool) => tool.available).map((tool) => tool.id).sort();
+  const blockedTools = tools.filter((tool) => !tool.available);
+  check("7 real local tools declared, no duplicates (not invented)", tools.length === 7 && new Set(tools.map((tool) => tool.id)).size === 7);
+  check(
+    "only exec-guard allowlist probes report available (git --version, node --version)",
+    availableIds.length === EXEC_ALLOWLIST_IDS.length &&
+      availableIds.every((id) => EXEC_ALLOWLIST_IDS.includes(id)) &&
+      reg.summary?.localToolsAvailable === availableIds.length,
+    `available=${availableIds.join("+") || "(none)"} summary=${reg.summary?.localToolsAvailable}`,
+  );
+  check(
+    "non-allowlisted tools report BLOCKED_BY_POLICY, never an invented version",
+    blockedTools.length === 5 && blockedTools.every((tool) => tool.version === "BLOCKED_BY_POLICY"),
+    blockedTools.map((tool) => `${tool.id}:${tool.version}`).join(","),
+  );
   check("no AI SDK installed / no new package / no .env.local", reg.dependencyCheck?.aiSdkInstalled?.length === 0 && reg.dependencyCheck?.newPackagesInstalled === 0 && reg.dependencyCheck?.localSecretFilePresent === false);
   check("registry reports 0 connected AI models", reg.summary?.aiModelsConnected === 0 && reg.connectionsSummary?.aiModelsConnected === 0);
   log("");
@@ -270,7 +290,26 @@ async function main() {
   }
   const modifiedTracked = gitStatus.split("\n").filter((line) => /^ ?M |^M  /.test(line)).map((line) => line.trim());
   log(`modified_tracked=${modifiedTracked.join(",")}`);
-  check("only the 2 intentional tracked edits (.gitignore, HubShell nav)", modifiedTracked.length === 2 && modifiedTracked.some((l) => l.includes(".gitignore")) && modifiedTracked.some((l) => l.includes("HubShell.tsx")), modifiedTracked.join(","));
+  // This used to assert "exactly 2 modified files (.gitignore, HubShell.tsx)" — a
+  // snapshot of the session that authored this harness. Those edits are merged now, so
+  // that assertion could never pass again on a clean tree. The durable property is:
+  // a harness run must not dirty any tracked SOURCE file. Only the committed evidence
+  // artifacts these harnesses overwrite by design (`*-verification.txt`) may be dirty.
+  // Consequence: this harness expects a COMMITTED tree. If you are mid-edit, commit
+  // first — the failure then means exactly what it says, not a stale frozen snapshot.
+  const EVIDENCE_ARTIFACT = /(^|\/)([\w.-]*-)?verification[\w.-]*\.txt$/;
+  // Next.js REWRITES this file on every dev/build run (`.next/dev/types` vs `.next/types`).
+  // It says "This file should not be edited" — it is generated, so it is not source.
+  const NEXT_GENERATED = new Set(["next-env.d.ts"]);
+  const tolerated = (file) => EVIDENCE_ARTIFACT.test(file) || NEXT_GENERATED.has(file);
+  const modifiedPaths = modifiedTracked.map((line) => line.replace(/^\S+\s+/, ""));
+  const modifiedSource = modifiedPaths.filter((file) => !tolerated(file));
+  check("harness run dirties no tracked source/config file", modifiedSource.length === 0, modifiedSource.join(","));
+  check(
+    "only evidence .txt artifacts and Next-generated next-env.d.ts may be dirty",
+    modifiedPaths.length === modifiedTracked.length && modifiedPaths.every((file) => tolerated(file)),
+    modifiedPaths.join(","),
+  );
   log("");
 
   // --------------------------------------------------------- Phase 0 regression
